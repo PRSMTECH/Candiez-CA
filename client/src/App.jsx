@@ -1,12 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
 
 // Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import POS from './pages/POS';
+import Products from './pages/Products';
+import Inventory from './pages/Inventory';
+import Transactions from './pages/Transactions';
+import Reports from './pages/Reports';
+import Settings from './pages/Settings';
+import Users from './pages/admin/Users';
 
 function App() {
   return (
@@ -16,33 +23,64 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
 
-          {/* Protected Routes - Require Authentication */}
+          {/* Protected Routes with Layout (Sidebar) */}
           <Route
-            path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Layout />
               </ProtectedRoute>
             }
-          />
+          >
+            {/* All authenticated users can access */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/pos" element={<POS />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/products" element={<Products />} />
 
-          <Route
-            path="/customers"
-            element={
-              <ProtectedRoute>
-                <Customers />
-              </ProtectedRoute>
-            }
-          />
+            {/* Manager and Admin only */}
+            <Route
+              path="/inventory"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <Inventory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <Transactions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/pos"
-            element={
-              <ProtectedRoute>
-                <POS />
-              </ProtectedRoute>
-            }
-          />
+            {/* Admin only routes */}
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Users />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
 
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
