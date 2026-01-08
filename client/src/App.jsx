@@ -7,13 +7,17 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
+import CustomerEdit from './pages/CustomerEdit';
 import POS from './pages/POS';
 import Products from './pages/Products';
+import ProductEdit from './pages/ProductEdit';
 import Inventory from './pages/Inventory';
 import Transactions from './pages/Transactions';
+import TransactionDetail from './pages/TransactionDetail';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Users from './pages/admin/Users';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -35,7 +39,9 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/pos" element={<POS />} />
             <Route path="/customers" element={<Customers />} />
+            <Route path="/customers/:id/edit" element={<CustomerEdit />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/products/:id/edit" element={<ProductEdit />} />
 
             {/* Manager and Admin only */}
             <Route
@@ -51,6 +57,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
                   <Transactions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transactions/:id"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <TransactionDetail />
                 </ProtectedRoute>
               }
             />
@@ -86,42 +100,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
           {/* 404 - Not Found */}
-          <Route
-            path="*"
-            element={
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '100vh',
-                fontFamily: 'var(--font-body)',
-                textAlign: 'center',
-                padding: '2rem'
-              }}>
-                <span style={{ fontSize: '4rem', marginBottom: '1rem' }}>🍬</span>
-                <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>
-                  404 - Page Not Found
-                </h1>
-                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-                  The page you are looking for does not exist.
-                </p>
-                <a
-                  href="/dashboard"
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    background: 'var(--color-primary)',
-                    color: 'white',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    fontWeight: '500'
-                  }}
-                >
-                  Go to Dashboard
-                </a>
-              </div>
-            }
-          />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

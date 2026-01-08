@@ -1,26 +1,304 @@
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import styles from './PagePlaceholder.module.css';
+import axios from 'axios';
+import styles from './Products.module.css';
+
+// Mock product data for development (California cannabis dispensary products)
+const mockProducts = [
+  {
+    id: 1,
+    name: 'Blue Dream',
+    category: 'Flower',
+    strain: 'Hybrid',
+    thcContent: 21.5,
+    cbdContent: 0.1,
+    price: 45.00,
+    unitPrice: 15.00,
+    unit: 'gram',
+    stock: 250,
+    status: 'active'
+  },
+  {
+    id: 2,
+    name: 'OG Kush',
+    category: 'Flower',
+    strain: 'Indica',
+    thcContent: 24.0,
+    cbdContent: 0.2,
+    price: 50.00,
+    unitPrice: 16.67,
+    unit: 'gram',
+    stock: 180,
+    status: 'active'
+  },
+  {
+    id: 3,
+    name: 'Sour Diesel',
+    category: 'Flower',
+    strain: 'Sativa',
+    thcContent: 22.0,
+    cbdContent: 0.3,
+    price: 48.00,
+    unitPrice: 16.00,
+    unit: 'gram',
+    stock: 120,
+    status: 'active'
+  },
+  {
+    id: 4,
+    name: 'CBD Calm Tincture',
+    category: 'Tinctures',
+    strain: 'N/A',
+    thcContent: 0.3,
+    cbdContent: 30.0,
+    price: 65.00,
+    unitPrice: 65.00,
+    unit: 'bottle',
+    stock: 45,
+    status: 'active'
+  },
+  {
+    id: 5,
+    name: 'Skywalker OG Cartridge',
+    category: 'Vape',
+    strain: 'Indica',
+    thcContent: 85.0,
+    cbdContent: 0.5,
+    price: 55.00,
+    unitPrice: 55.00,
+    unit: 'cartridge',
+    stock: 80,
+    status: 'active'
+  },
+  {
+    id: 6,
+    name: 'Indica Gummies 10pk',
+    category: 'Edibles',
+    strain: 'Indica',
+    thcContent: 10.0,
+    cbdContent: 0.0,
+    price: 35.00,
+    unitPrice: 3.50,
+    unit: 'piece',
+    stock: 0,
+    status: 'out_of_stock'
+  },
+  {
+    id: 7,
+    name: 'GSC Pre-Roll 5pk',
+    category: 'Pre-Rolls',
+    strain: 'Hybrid',
+    thcContent: 20.0,
+    cbdContent: 0.1,
+    price: 40.00,
+    unitPrice: 8.00,
+    unit: 'joint',
+    stock: 60,
+    status: 'active'
+  }
+];
 
 function Products() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/products', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProducts(response.data.products || response.data);
+    } catch {
+      // Use mock data for development
+      setProducts(mockProducts);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = (productId) => {
+    navigate(`/products/${productId}/edit`);
+  };
+
+  const handleView = (productId) => {
+    navigate(`/products/${productId}`);
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.strain.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = [...new Set(products.map(p => p.category))];
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  const getStatusBadge = (status, stock) => {
+    if (stock === 0 || status === 'out_of_stock') {
+      return styles.statusOutOfStock;
+    }
+    if (stock < 20) {
+      return styles.statusLowStock;
+    }
+    return styles.statusActive;
+  };
+
+  const getStatusText = (status, stock) => {
+    if (stock === 0 || status === 'out_of_stock') {
+      return 'Out of Stock';
+    }
+    if (stock < 20) {
+      return 'Low Stock';
+    }
+    return 'In Stock';
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading products...</div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Products</h1>
-        <p className={styles.subtitle}>Manage your product catalog</p>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>Products</h1>
+          <p className={styles.subtitle}>
+            Manage your cannabis product inventory • {products.length} products
+          </p>
+        </div>
+        <Link to="/products/new" className={styles.addButton}>
+          + Add Product
+        </Link>
       </div>
 
-      <div className={styles.placeholder}>
-        <div className={styles.icon}>🌿</div>
-        <h2>Product Catalog Coming Soon</h2>
-        <p>
-          Add, edit, and manage products. Track strains, THC/CBD levels,
-          pricing, and categories (Flower, Edibles, Concentrates, etc.).
-        </p>
-        <p className={styles.userNote}>
-          Logged in as: {user?.firstName || 'User'} ({user?.role || 'staff'})
-        </p>
+      <div className={styles.filters}>
+        <div className={styles.searchWrapper}>
+          <input
+            type="text"
+            placeholder="Search by name, category, or strain..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className={styles.filterSelect}
+        >
+          <option value="all">All Categories</option>
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
+
+      {filteredProducts.length === 0 ? (
+        <div className={styles.empty}>
+          <p>No products found matching your search.</p>
+        </div>
+      ) : (
+        <div className={styles.tableWrapper}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>THC/CBD</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.map((product) => (
+                <tr key={product.id}>
+                  <td>
+                    <div className={styles.productInfo}>
+                      <span className={styles.productName}>{product.name}</span>
+                      <span className={styles.productId}>ID: {product.id}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div className={styles.categoryInfo}>
+                      <span>{product.category}</span>
+                      <span className={styles.strain}>{product.strain}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div className={styles.thcCbd}>
+                      <span className={styles.thc}>THC: {product.thcContent}%</span>
+                      <span className={styles.cbd}>CBD: {product.cbdContent}%</span>
+                    </div>
+                  </td>
+                  <td className={styles.price}>
+                    {formatCurrency(product.price)}
+                    <span className={styles.unitPrice}>
+                      {formatCurrency(product.unitPrice)}/{product.unit}
+                    </span>
+                  </td>
+                  <td className={styles.stock}>
+                    {product.stock} units
+                  </td>
+                  <td>
+                    <span className={`${styles.statusBadge} ${getStatusBadge(product.status, product.stock)}`}>
+                      {getStatusText(product.status, product.stock)}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.actions}>
+                      <button
+                        onClick={() => handleView(product.id)}
+                        className={styles.viewButton}
+                        title="View product details"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => handleEdit(product.id)}
+                        className={styles.editButton}
+                        title="Edit product"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className={styles.userNote}>
+        Logged in as: {user?.firstName || 'User'} ({user?.role || 'staff'})
       </div>
     </div>
   );
