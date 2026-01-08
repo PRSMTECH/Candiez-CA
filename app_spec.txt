@@ -1,0 +1,628 @@
+<project_specification>
+  <project_name>Candiez-CA</project_name>
+
+  <overview>
+    Candiez-CA is a CRM and inventory management system for a California marijuana dispensary. The application focuses on two core areas: client acquisition (tracking customers, loyalty programs, communication) and inventory management (product catalog, stock levels, compliance tracking). The UI features a playful, candy-themed purple/lavender design that matches the Candiez brand identity.
+  </overview>
+
+  <technology_stack>
+    <frontend>
+      <framework>React 18</framework>
+      <styling>CSS Modules with custom properties for theming</styling>
+      <state_management>React Context + useReducer</state_management>
+      <routing>React Router v6</routing>
+      <icons>Lucide React</icons>
+      <charts>Recharts</charts>
+    </frontend>
+    <backend>
+      <runtime>Node.js with Express</runtime>
+      <database>SQLite with better-sqlite3</database>
+      <authentication>JWT with bcrypt</authentication>
+      <validation>Zod</validation>
+    </backend>
+    <communication>
+      <api>REST API</api>
+      <format>JSON</format>
+    </communication>
+  </technology_stack>
+
+  <prerequisites>
+    <environment_setup>
+      Node.js 18+ required
+      npm or yarn package manager
+      SQLite3 installed
+    </environment_setup>
+  </prerequisites>
+
+  <feature_count>145</feature_count>
+
+  <security_and_access_control>
+    <user_roles>
+      <role name="admin">
+        <permissions>
+          - Full system access
+          - User management (create, edit, delete staff)
+          - System configuration and settings
+          - View all reports and analytics
+          - Manage inventory and products
+          - Access all customer data
+          - Void/refund transactions
+          - Export data
+        </permissions>
+        <protected_routes>
+          - /admin/* (full access)
+          - /settings/* (full access)
+          - /users/* (full access)
+        </protected_routes>
+      </role>
+      <role name="manager">
+        <permissions>
+          - View all reports and analytics
+          - Manage inventory and products
+          - View and edit customer data
+          - Process transactions
+          - Manage loyalty program
+          - View staff activity
+          - Cannot manage users or system settings
+        </permissions>
+        <protected_routes>
+          - /inventory/* (full access)
+          - /customers/* (full access)
+          - /reports/* (view only)
+        </protected_routes>
+      </role>
+      <role name="budtender">
+        <permissions>
+          - Process sales transactions
+          - View product catalog and stock
+          - Search and view customer profiles
+          - Add new customers
+          - Apply loyalty rewards
+          - Cannot edit inventory or view reports
+        </permissions>
+        <protected_routes>
+          - /pos/* (full access)
+          - /customers/* (view and add only)
+          - /products/* (view only)
+        </protected_routes>
+      </role>
+    </user_roles>
+    <authentication>
+      <method>email/password with JWT</method>
+      <session_timeout>8 hours</session_timeout>
+      <password_requirements>Minimum 8 characters, at least one number</password_requirements>
+    </authentication>
+    <sensitive_operations>
+      - Void transaction requires manager/admin approval
+      - Delete customer requires admin confirmation
+      - Inventory adjustments require reason and manager approval
+      - User deletion requires password confirmation
+    </sensitive_operations>
+  </security_and_access_control>
+
+  <core_features>
+    <authentication_and_users>
+      - Staff login with email/password
+      - JWT token authentication
+      - Role-based access control (admin, manager, budtender)
+      - Password reset functionality
+      - Session management and auto-logout
+      - Staff profile management
+      - Activity logging per user
+      - Create new staff accounts (admin only)
+      - Deactivate staff accounts
+      - View login history
+    </authentication_and_users>
+
+    <customer_management_crm>
+      - Add new customer with profile
+      - Customer search by name, phone, email
+      - Customer profile view with purchase history
+      - Edit customer information
+      - Customer notes and tags
+      - Track customer preferences (favorite strains, products)
+      - Birthday tracking with notifications
+      - Customer photo upload (optional)
+      - Medical card expiration tracking (if applicable)
+      - Age verification (21+) checkbox
+      - Customer communication preferences
+      - Export customer list
+      - Customer segmentation (new, regular, VIP)
+      - Referral tracking (who referred whom)
+      - Merge duplicate customers
+    </customer_management_crm>
+
+    <loyalty_program>
+      - Points-based reward system
+      - Earn points on purchases (configurable rate)
+      - Redeem points for discounts
+      - View point balance on customer profile
+      - Points history log
+      - Tier levels (Bronze, Silver, Gold, Platinum)
+      - Tier-based benefits (extra points, exclusive deals)
+      - Birthday bonus points
+      - First purchase bonus
+      - Referral bonus points
+      - Points expiration management
+      - Loyalty program dashboard/analytics
+    </loyalty_program>
+
+    <product_catalog>
+      - Add new products
+      - Edit product details
+      - Product categories (Flower, Edibles, Concentrates, Pre-rolls, Topicals, Accessories)
+      - Subcategories within each main category
+      - Product images (multiple per product)
+      - Product descriptions
+      - Strain type (Indica, Sativa, Hybrid, CBD)
+      - THC/CBD percentage display
+      - Product pricing (regular and sale price)
+      - Product SKU/barcode
+      - Active/inactive product status
+      - Product search and filtering
+      - Sort products by name, price, stock, category
+      - Bulk product import (CSV)
+      - Product quick view modal
+    </product_catalog>
+
+    <inventory_management>
+      - Real-time stock level tracking
+      - Low stock alerts (configurable threshold)
+      - Out of stock indicators
+      - Inventory adjustment with reasons
+      - Batch/lot number tracking
+      - Receive inventory (purchase orders)
+      - Inventory count/audit feature
+      - Stock movement history
+      - Supplier/vendor management
+      - Cost tracking (wholesale price)
+      - Profit margin calculation
+      - Expiration date tracking
+      - Inventory reports
+      - Transfer between locations (if multi-location)
+      - Damaged/waste logging
+    </inventory_management>
+
+    <compliance_california>
+      - Daily purchase limit tracking per customer
+      - Age verification enforcement (21+)
+      - Batch/lot number on all products
+      - Lab testing info display (THC %, CBD %, terpenes)
+      - Track-and-trace ready (METRC fields)
+      - Compliance reports
+      - License number display
+      - Required warnings on receipts
+    </compliance_california>
+
+    <point_of_sale>
+      - Quick product lookup
+      - Barcode scanning support
+      - Add items to cart
+      - Adjust quantities in cart
+      - Remove items from cart
+      - Apply discounts (percentage or fixed)
+      - Apply loyalty points redemption
+      - Calculate tax automatically
+      - Multiple payment types (cash, debit - no credit)
+      - Split payment support
+      - Generate receipt
+      - Print receipt
+      - Email receipt option
+      - Transaction notes
+      - Hold/recall transactions
+      - Quick customer lookup at POS
+      - Associate transaction with customer
+      - Daily sales total display
+      - Cash drawer management
+      - Shift start/end with cash count
+    </point_of_sale>
+
+    <transactions_and_invoices>
+      - Transaction history view
+      - Search transactions by date, customer, amount
+      - Transaction detail view
+      - Void transaction (with approval)
+      - Refund transaction (full or partial)
+      - Reprint receipt
+      - Transaction export (CSV, PDF)
+      - Daily transaction summary
+      - Invoice generation
+      - Invoice PDF export
+      - Invoice email to customer
+    </transactions_and_invoices>
+
+    <reporting_dashboard>
+      - Sales dashboard with key metrics
+      - Today's sales total
+      - Weekly/monthly sales charts
+      - Top selling products
+      - Sales by category breakdown
+      - Sales by staff member
+      - Customer acquisition metrics
+      - New customers this week/month
+      - Customer retention rate
+      - Loyalty program metrics
+      - Inventory value report
+      - Low stock report
+      - Profit margin reports
+      - Custom date range reports
+      - Export reports to CSV/PDF
+    </reporting_dashboard>
+
+    <settings_and_configuration>
+      - Business profile (name, address, license)
+      - Tax rate configuration
+      - Receipt customization
+      - Loyalty program settings
+      - Low stock threshold settings
+      - Notification preferences
+      - Data backup/export
+      - Theme customization (light/dark mode)
+    </settings_and_configuration>
+
+    <ui_and_experience>
+      - Responsive design (desktop, tablet, mobile)
+      - Purple/lavender candy theme matching brand
+      - Gradient accents and glossy effects
+      - Smooth animations and transitions
+      - Loading states and skeletons
+      - Toast notifications
+      - Confirmation modals
+      - Keyboard shortcuts for POS
+      - Dark mode option
+      - Sidebar navigation with icons
+      - Breadcrumb navigation
+      - Empty states with illustrations
+      - Error states with recovery options
+    </ui_and_experience>
+  </core_features>
+
+  <database_schema>
+    <tables>
+      <users>
+        - id, email, password_hash, first_name, last_name
+        - role (admin/manager/budtender), status (active/inactive)
+        - phone, avatar_url, created_at, updated_at, last_login
+      </users>
+      <customers>
+        - id, first_name, last_name, email, phone
+        - date_of_birth, age_verified, medical_card_number, medical_card_expiry
+        - address, city, state, zip, photo_url
+        - notes, tags, preferences, referral_source, referred_by_customer_id
+        - loyalty_points, loyalty_tier, created_at, updated_at
+      </customers>
+      <categories>
+        - id, name, slug, description, parent_id, sort_order, is_active
+      </categories>
+      <products>
+        - id, sku, barcode, name, description, category_id
+        - strain_type (indica/sativa/hybrid/cbd), thc_percent, cbd_percent
+        - price, sale_price, cost, weight, weight_unit
+        - stock_quantity, low_stock_threshold, batch_number, lab_test_url
+        - expiration_date, image_urls, is_active, created_at, updated_at
+      </products>
+      <suppliers>
+        - id, name, contact_name, email, phone, address
+        - license_number, notes, is_active, created_at
+      </suppliers>
+      <inventory_adjustments>
+        - id, product_id, user_id, adjustment_type, quantity_change
+        - reason, notes, batch_number, approved_by, created_at
+      </inventory_adjustments>
+      <transactions>
+        - id, transaction_number, customer_id, user_id
+        - subtotal, tax_amount, discount_amount, loyalty_points_used, total
+        - payment_method, payment_status, notes
+        - voided, voided_by, voided_at, void_reason
+        - created_at, updated_at
+      </transactions>
+      <transaction_items>
+        - id, transaction_id, product_id, quantity, unit_price
+        - discount_amount, total_price, created_at
+      </transaction_items>
+      <loyalty_transactions>
+        - id, customer_id, transaction_id, points_earned, points_redeemed
+        - reason, created_at
+      </loyalty_transactions>
+      <shifts>
+        - id, user_id, register_id, start_time, end_time
+        - starting_cash, ending_cash, expected_cash, notes, status
+      </shifts>
+      <settings>
+        - id, key, value, updated_at, updated_by
+      </settings>
+      <activity_log>
+        - id, user_id, action, entity_type, entity_id, details, ip_address, created_at
+      </activity_log>
+    </tables>
+  </database_schema>
+
+  <api_endpoints_summary>
+    <auth>
+      - POST /api/auth/login
+      - POST /api/auth/logout
+      - POST /api/auth/refresh
+      - POST /api/auth/forgot-password
+      - POST /api/auth/reset-password
+      - GET /api/auth/me
+    </auth>
+    <users>
+      - GET /api/users
+      - GET /api/users/:id
+      - POST /api/users
+      - PUT /api/users/:id
+      - DELETE /api/users/:id
+    </users>
+    <customers>
+      - GET /api/customers
+      - GET /api/customers/:id
+      - POST /api/customers
+      - PUT /api/customers/:id
+      - DELETE /api/customers/:id
+      - GET /api/customers/:id/transactions
+      - GET /api/customers/:id/loyalty
+      - POST /api/customers/:id/loyalty/redeem
+      - POST /api/customers/merge
+    </customers>
+    <products>
+      - GET /api/products
+      - GET /api/products/:id
+      - POST /api/products
+      - PUT /api/products/:id
+      - DELETE /api/products/:id
+      - POST /api/products/import
+      - GET /api/products/low-stock
+    </products>
+    <categories>
+      - GET /api/categories
+      - POST /api/categories
+      - PUT /api/categories/:id
+      - DELETE /api/categories/:id
+    </categories>
+    <inventory>
+      - GET /api/inventory/adjustments
+      - POST /api/inventory/adjustments
+      - POST /api/inventory/receive
+      - GET /api/inventory/report
+    </inventory>
+    <transactions>
+      - GET /api/transactions
+      - GET /api/transactions/:id
+      - POST /api/transactions
+      - POST /api/transactions/:id/void
+      - POST /api/transactions/:id/refund
+      - GET /api/transactions/:id/receipt
+    </transactions>
+    <reports>
+      - GET /api/reports/sales
+      - GET /api/reports/inventory
+      - GET /api/reports/customers
+      - GET /api/reports/loyalty
+      - GET /api/reports/staff
+    </reports>
+    <settings>
+      - GET /api/settings
+      - PUT /api/settings
+    </settings>
+  </api_endpoints_summary>
+
+  <ui_layout>
+    <main_structure>
+      Sidebar navigation (collapsible) on the left with:
+      - Logo (Candiez candy-themed logo)
+      - Dashboard
+      - POS (Point of Sale)
+      - Customers
+      - Products
+      - Inventory
+      - Transactions
+      - Reports
+      - Settings (admin only)
+      - Staff (admin only)
+
+      Top header bar with:
+      - Search bar
+      - Notifications bell
+      - User profile dropdown
+      - Dark/light mode toggle
+
+      Main content area with breadcrumbs and page content
+    </main_structure>
+    <key_screens>
+      - Login page (centered card with gradient background)
+      - Dashboard (metrics cards, charts, recent activity)
+      - POS screen (product grid left, cart right, customer lookup top)
+      - Customer list (searchable table with filters)
+      - Customer detail (tabs: profile, transactions, loyalty, notes)
+      - Product list (grid or table view toggle)
+      - Product detail/edit (form with image upload)
+      - Inventory management (stock levels, adjustments)
+      - Transaction history (filterable table)
+      - Reports dashboard (date pickers, charts, export buttons)
+      - Settings (tabbed interface)
+    </key_screens>
+  </ui_layout>
+
+  <design_system>
+    <color_palette>
+      <primary>
+        - Primary: #B57EDC (Lavender purple)
+        - Primary Light: #E8D5F2 (Light lavender)
+        - Primary Dark: #7B4A9E (Deep purple)
+      </primary>
+      <secondary>
+        - Teal Accent: #5BC0BE (From candy decoration)
+        - Pink Accent: #F5A9B8 (From candy decoration)
+        - Yellow Accent: #F7DC6F (From candy decoration)
+      </secondary>
+      <neutrals>
+        - Background Light: #FAFAFA
+        - Background Dark: #1A1A2E
+        - Card Light: #FFFFFF
+        - Card Dark: #252542
+        - Text Primary: #2D2D2D
+        - Text Secondary: #6B6B6B
+        - Text Dark Mode: #E8E8E8
+      </neutrals>
+      <semantic>
+        - Success: #4CAF50
+        - Warning: #FF9800
+        - Error: #F44336
+        - Info: #2196F3
+      </semantic>
+    </color_palette>
+    <typography>
+      <fonts>
+        - Headings: Poppins (Bold, Semi-Bold)
+        - Body: Inter (Regular, Medium)
+        - Monospace: JetBrains Mono (for prices, codes)
+      </fonts>
+      <sizes>
+        - H1: 32px
+        - H2: 24px
+        - H3: 20px
+        - H4: 16px
+        - Body: 14px
+        - Small: 12px
+      </sizes>
+    </typography>
+    <effects>
+      - Gradient buttons (purple gradient with hover glow)
+      - Soft shadows (box-shadow with purple tint)
+      - Rounded corners (8px default, 16px for cards)
+      - Glassmorphism for modals and overlays
+      - Subtle animations (fade, slide, scale)
+      - Glossy/candy-like button effects
+    </effects>
+  </design_system>
+
+  <implementation_steps>
+    <step number="1">
+      <title>Project Setup and Authentication</title>
+      <tasks>
+        - Initialize React app with Vite
+        - Set up Express server with SQLite
+        - Create database schema and migrations
+        - Implement JWT authentication
+        - Build login page with Candiez branding
+        - Create protected route wrapper
+        - Set up role-based access control
+      </tasks>
+    </step>
+    <step number="2">
+      <title>Core UI Framework</title>
+      <tasks>
+        - Build design system (colors, typography, spacing)
+        - Create reusable UI components (Button, Input, Card, Modal, etc.)
+        - Implement sidebar navigation
+        - Build header with user menu
+        - Create responsive layout shell
+        - Implement dark/light mode toggle
+        - Add loading states and toast notifications
+      </tasks>
+    </step>
+    <step number="3">
+      <title>Customer Management</title>
+      <tasks>
+        - Build customer list page with search and filters
+        - Create customer detail page with tabs
+        - Implement add/edit customer forms
+        - Add customer notes and tags functionality
+        - Build referral tracking
+        - Implement customer segmentation
+      </tasks>
+    </step>
+    <step number="4">
+      <title>Product Catalog and Inventory</title>
+      <tasks>
+        - Build product list (grid and table views)
+        - Create product detail/edit page
+        - Implement category management
+        - Build inventory adjustment workflow
+        - Add low stock alerts
+        - Implement stock movement history
+        - Create supplier management
+      </tasks>
+    </step>
+    <step number="5">
+      <title>Point of Sale</title>
+      <tasks>
+        - Build POS interface with product grid
+        - Implement cart functionality
+        - Add customer lookup at checkout
+        - Build payment processing flow
+        - Implement receipt generation
+        - Add transaction hold/recall
+        - Build shift management
+      </tasks>
+    </step>
+    <step number="6">
+      <title>Loyalty Program</title>
+      <tasks>
+        - Implement points earning on transactions
+        - Build points redemption flow
+        - Create tier system
+        - Add loyalty dashboard
+        - Implement bonus points (birthday, referral)
+        - Build points history view
+      </tasks>
+    </step>
+    <step number="7">
+      <title>Transactions and Reports</title>
+      <tasks>
+        - Build transaction history page
+        - Implement void/refund workflows
+        - Create sales dashboard
+        - Build inventory reports
+        - Add customer analytics
+        - Implement data export (CSV, PDF)
+      </tasks>
+    </step>
+    <step number="8">
+      <title>Settings and Polish</title>
+      <tasks>
+        - Build settings pages
+        - Implement business profile management
+        - Add receipt customization
+        - Final UI polish and animations
+        - Responsive testing and fixes
+        - Performance optimization
+      </tasks>
+    </step>
+  </implementation_steps>
+
+  <success_criteria>
+    <functionality>
+      - All CRUD operations work for customers, products, transactions
+      - Authentication and role-based access fully functional
+      - POS can complete full checkout flow
+      - Loyalty points calculate and redeem correctly
+      - All reports generate accurate data
+      - Search and filtering work across all entities
+    </functionality>
+    <user_experience>
+      - Clean, intuitive navigation
+      - Consistent Candiez purple/lavender branding throughout
+      - Responsive on desktop, tablet, and mobile
+      - Loading states prevent confusion
+      - Error messages are helpful and actionable
+      - Forms validate properly with clear feedback
+    </user_experience>
+    <technical_quality>
+      - No console errors in normal operation
+      - API responses under 500ms
+      - Proper error handling throughout
+      - Secure authentication with proper JWT handling
+      - Database properly indexed for common queries
+      - Code is organized and maintainable
+    </technical_quality>
+    <design_polish>
+      - Candy-themed purple/lavender aesthetic consistent
+      - Smooth animations and transitions
+      - Professional, modern appearance
+      - Dark mode fully styled
+      - Empty states and error states designed
+      - Icons and imagery consistent
+    </design_polish>
+  </success_criteria>
+</project_specification>
