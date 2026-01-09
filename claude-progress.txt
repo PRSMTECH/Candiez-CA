@@ -766,3 +766,75 @@ January 9, 2026
 End of Coding Agent Session 8
 January 9, 2026
 
+
+---
+
+## Coding Agent Session 9
+**Date:** January 9, 2026
+**Starting Status:** 163/163 features passing (100% complete)
+**Focus:** Regression Testing (Continued)
+
+### Regression Test Features Selected
+1. Feature #20: Modal close returns to previous state
+2. Feature #79: Delete customer removes from all views
+3. Feature #63: Multiple tabs handle state correctly
+
+### Regression Test Results
+
+#### Feature #20: Modal close returns to previous state ✅ PASSED
+- Navigated to Customers page
+- Clicked Delete button on a customer
+- Delete confirmation modal appeared
+- Closed modal via X button → Stayed on Customers list with data unchanged
+- Reopened modal and clicked Cancel button → Same result
+- Modal close behavior preserves page state correctly
+- Screenshot saved: regression-feature20-modal-close-verified.png
+
+#### Feature #79: Delete customer removes from all views ✅ PASSED
+- Created test customer "RegTest79 DeleteCascade" (ID: 34)
+- Navigated to POS, started shift with $100 cash
+- Selected test customer and added product to cart ($55.00)
+- Completed sale - Transaction TXN-MK6RYCH5-63D2 created ($59.26)
+- Navigated to Transactions → Customer name displayed on transaction
+- Navigated to Customers → Customer has 59 loyalty points
+- Deleted customer → Soft-delete (status changed to "inactive")
+- Verified in Transactions page → Customer name preserved for historical records
+- Verified in POS → Deleted customer NOT in customer dropdown (only active customers shown)
+- Screenshot saved: regression-feature79-deleted-customer-not-in-pos.png
+
+#### Feature #63: Multiple tabs handle state correctly ✅ PASSED
+- Tab 0: POS page with shift started
+- Tab 1: Customers page opened in new browser tab
+- Created new customer "MultiTab TestF63" (ID: 35) in Tab 1
+- Customer count updated to 35 total
+- Switched to Tab 0 (POS) and navigated to refresh customer data
+- New customer "MultiTab TestF63 (0 pts)" appeared in POS customer dropdown
+- Data correctly syncs between tabs when views are refreshed
+- Screenshot saved: regression-feature63-new-customer-visible-in-tab0.png
+
+### Application Health Verification
+- All CRUD operations working correctly
+- POS shift management working (start shift with cash amount)
+- Transaction creation working with customer selection
+- Loyalty points correctly awarded
+- Soft-delete cascade working properly (historical data preserved)
+- Multi-tab state handling working correctly
+- Dashboard showing 35 total customers after test
+
+### Status at Session End
+- Features: 163/163 passing (100%)
+- All 3 regression tests passed
+- No new bugs discovered
+- Application stable and functioning correctly
+
+### Screenshots Saved
+- regression-feature20-modal-close-verified.png
+- regression-feature79-deleted-customer-not-in-pos.png
+- regression-feature63-multitab-state-verified.png
+- regression-feature63-new-customer-visible-in-tab0.png
+
+---
+End of Coding Agent Session 9
+January 9, 2026
+
+
