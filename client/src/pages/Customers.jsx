@@ -83,18 +83,35 @@ function Customers() {
     fetchCustomers();
   }, []);
 
+  // Map snake_case API response to camelCase for frontend
+  const mapCustomerFromApi = (customer) => ({
+    id: customer.id,
+    firstName: customer.first_name,
+    lastName: customer.last_name,
+    email: customer.email || '',
+    phone: customer.phone || '',
+    dateOfBirth: customer.date_of_birth,
+    loyaltyPoints: customer.loyalty_points || 0,
+    totalPurchases: customer.total_spent || 0,
+    createdAt: customer.created_at,
+    status: customer.status || 'active'
+  });
+
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      // Try API first, fall back to mock data
       const token = localStorage.getItem('token');
       const response = await axios.get('/api/customers', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setCustomers(response.data.customers || response.data);
-    } catch {
-      // Use mock data for development
-      setCustomers(mockCustomers);
+      const rawCustomers = response.data.customers || response.data || [];
+      // Map API response to frontend format
+      const mappedCustomers = rawCustomers.map(mapCustomerFromApi);
+      setCustomers(mappedCustomers);
+    } catch (err) {
+      console.error('Error fetching customers:', err);
+      // Only use mock data if API fails
+      setCustomers([]);
     } finally {
       setLoading(false);
     }

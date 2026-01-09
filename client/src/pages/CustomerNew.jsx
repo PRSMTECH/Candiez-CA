@@ -1,85 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import styles from './CustomerEdit.module.css';
+import styles from './CustomerNew.module.css';
 
-// Mock customer data for development
-const mockCustomers = [
-  {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Smith',
-    email: 'john.smith@email.com',
-    phone: '(555) 123-4567',
-    dateOfBirth: '1990-05-15',
-    address: '123 Main St, Los Angeles, CA 90001',
-    loyaltyPoints: 250,
-    totalPurchases: 1250.00,
-    status: 'active',
-    notes: 'Prefers indica strains'
-  },
-  {
-    id: 2,
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    email: 'sarah.j@email.com',
-    phone: '(555) 234-5678',
-    dateOfBirth: '1988-08-22',
-    address: '456 Oak Ave, San Diego, CA 92101',
-    loyaltyPoints: 480,
-    totalPurchases: 2350.00,
-    status: 'active',
-    notes: 'VIP customer, frequent buyer'
-  },
-  {
-    id: 3,
-    firstName: 'Michael',
-    lastName: 'Williams',
-    email: 'mike.w@email.com',
-    phone: '(555) 345-6789',
-    dateOfBirth: '1995-03-10',
-    address: '789 Pine Blvd, Sacramento, CA 95814',
-    loyaltyPoints: 120,
-    totalPurchases: 650.00,
-    status: 'active',
-    notes: ''
-  },
-  {
-    id: 4,
-    firstName: 'Emily',
-    lastName: 'Brown',
-    email: 'emily.brown@email.com',
-    phone: '(555) 456-7890',
-    dateOfBirth: '1992-11-28',
-    address: '321 Elm St, San Francisco, CA 94102',
-    loyaltyPoints: 890,
-    totalPurchases: 4200.00,
-    status: 'vip',
-    notes: 'Top tier customer, always buy premium'
-  },
-  {
-    id: 5,
-    firstName: 'David',
-    lastName: 'Garcia',
-    email: 'david.g@email.com',
-    phone: '(555) 567-8901',
-    dateOfBirth: '1985-07-04',
-    address: '654 Maple Dr, Oakland, CA 94601',
-    loyaltyPoints: 50,
-    totalPurchases: 320.00,
-    status: 'new',
-    notes: 'New customer as of April 2024'
-  }
-];
-
-function CustomerEdit() {
-  const { id } = useParams();
+function CustomerNew() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -87,56 +17,49 @@ function CustomerEdit() {
     phone: '',
     dateOfBirth: '',
     address: '',
-    status: 'active',
-    notes: ''
+    status: 'new',
+    notes: '',
+    ageVerified: false
   });
-
-  // Map snake_case API response to camelCase for frontend
-  const mapCustomerFromApi = (customer) => ({
-    firstName: customer.first_name || '',
-    lastName: customer.last_name || '',
-    email: customer.email || '',
-    phone: customer.phone || '',
-    dateOfBirth: customer.date_of_birth || '',
-    address: customer.address || '',
-    status: customer.status || 'active',
-    notes: customer.notes || ''
-  });
-
-  useEffect(() => {
-    const fetchCustomer = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`/api/customers/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const rawCustomer = response.data.customer || response.data;
-        setFormData(mapCustomerFromApi(rawCustomer));
-      } catch (err) {
-        console.error('Error fetching customer:', err);
-        setError('Customer not found');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCustomer();
-  }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const validateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 21;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
+    setSuccess(false);
+
+    // Validate age
+    if (!validateAge(formData.dateOfBirth)) {
+      setError('Customer must be at least 21 years old.');
+      setSaving(false);
+      return;
+    }
+
+    // Validate age verification checkbox
+    if (!formData.ageVerified) {
+      setError('You must verify that you have checked the customer\'s ID.');
+      setSaving(false);
+      return;
+    }
 
     try {
       const token = localStorage.getItem('token');
@@ -149,18 +72,25 @@ function CustomerEdit() {
         phone: formData.phone,
         date_of_birth: formData.dateOfBirth,
         address: formData.address,
-        status: formData.status,
-        notes: formData.notes
+        notes: formData.notes,
+        status: formData.status
       };
 
-      await axios.put(`/api/customers/${id}`, apiData, {
+      const response = await axios.post('/api/customers', apiData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Customer updated successfully');
-      navigate('/customers');
+
+      console.log('Customer created successfully:', response.data);
+      setSuccess(true);
+      // Navigate to customer list after success
+      setTimeout(() => {
+        navigate('/customers');
+      }, 1500);
+
+      return response;
     } catch (err) {
-      console.error('Error updating customer:', err);
-      setError(err.response?.data?.error || 'Failed to update customer');
+      console.error('Customer creation error:', err);
+      setError(err.response?.data?.error || 'Failed to create customer. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -170,36 +100,26 @@ function CustomerEdit() {
     navigate('/customers');
   };
 
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>Loading customer data...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.error}>
-          <h2>Error</h2>
-          <p>{error}</p>
-          <button onClick={() => navigate('/customers')} className={styles.backButton}>
-            Back to Customers
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Edit Customer</h1>
+        <h1 className={styles.title}>Add New Customer</h1>
         <p className={styles.subtitle}>
-          Customer ID: {id} • {formData.firstName} {formData.lastName}
+          Register a new customer in the system
         </p>
       </div>
+
+      {success && (
+        <div className={styles.successMessage}>
+          Customer created successfully! Redirecting...
+        </div>
+      )}
+
+      {error && (
+        <div className={styles.errorMessage}>
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formSection}>
@@ -207,7 +127,9 @@ function CustomerEdit() {
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label htmlFor="firstName" className={styles.label}>First Name</label>
+              <label htmlFor="firstName" className={styles.label}>
+                First Name <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 id="firstName"
@@ -216,10 +138,13 @@ function CustomerEdit() {
                 onChange={handleChange}
                 className={styles.input}
                 required
+                placeholder="Enter first name"
               />
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="lastName" className={styles.label}>Last Name</label>
+              <label htmlFor="lastName" className={styles.label}>
+                Last Name <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 id="lastName"
@@ -228,13 +153,16 @@ function CustomerEdit() {
                 onChange={handleChange}
                 className={styles.input}
                 required
+                placeholder="Enter last name"
               />
             </div>
           </div>
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>Email</label>
+              <label htmlFor="email" className={styles.label}>
+                Email <span className={styles.required}>*</span>
+              </label>
               <input
                 type="email"
                 id="email"
@@ -243,10 +171,13 @@ function CustomerEdit() {
                 onChange={handleChange}
                 className={styles.input}
                 required
+                placeholder="email@example.com"
               />
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="phone" className={styles.label}>Phone</label>
+              <label htmlFor="phone" className={styles.label}>
+                Phone <span className={styles.required}>*</span>
+              </label>
               <input
                 type="tel"
                 id="phone"
@@ -254,13 +185,17 @@ function CustomerEdit() {
                 value={formData.phone}
                 onChange={handleChange}
                 className={styles.input}
+                required
+                placeholder="(555) 123-4567"
               />
             </div>
           </div>
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label htmlFor="dateOfBirth" className={styles.label}>Date of Birth</label>
+              <label htmlFor="dateOfBirth" className={styles.label}>
+                Date of Birth <span className={styles.required}>*</span>
+              </label>
               <input
                 type="date"
                 id="dateOfBirth"
@@ -270,6 +205,7 @@ function CustomerEdit() {
                 className={styles.input}
                 required
               />
+              <span className={styles.hint}>Must be 21 years or older</span>
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="status" className={styles.label}>Status</label>
@@ -283,7 +219,6 @@ function CustomerEdit() {
                 <option value="new">New</option>
                 <option value="active">Active</option>
                 <option value="vip">VIP</option>
-                <option value="inactive">Inactive</option>
               </select>
             </div>
           </div>
@@ -301,6 +236,7 @@ function CustomerEdit() {
               value={formData.address}
               onChange={handleChange}
               className={styles.input}
+              placeholder="Street address, city, state, ZIP"
             />
           </div>
 
@@ -318,6 +254,25 @@ function CustomerEdit() {
           </div>
         </div>
 
+        <div className={styles.formSection}>
+          <h2 className={styles.sectionTitle}>Age Verification</h2>
+
+          <div className={styles.checkboxGroup}>
+            <input
+              type="checkbox"
+              id="ageVerified"
+              name="ageVerified"
+              checked={formData.ageVerified}
+              onChange={handleChange}
+              className={styles.checkbox}
+            />
+            <label htmlFor="ageVerified" className={styles.checkboxLabel}>
+              I verify that I have checked this customer&apos;s ID and they are 21 years of age or older.
+              <span className={styles.required}>*</span>
+            </label>
+          </div>
+        </div>
+
         <div className={styles.formActions}>
           <button
             type="button"
@@ -330,9 +285,9 @@ function CustomerEdit() {
           <button
             type="submit"
             className={styles.saveButton}
-            disabled={saving}
+            disabled={saving || success}
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Saving...' : 'Create Customer'}
           </button>
         </div>
       </form>
@@ -344,4 +299,4 @@ function CustomerEdit() {
   );
 }
 
-export default CustomerEdit;
+export default CustomerNew;

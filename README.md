@@ -187,8 +187,8 @@ VITE_API_URL=http://localhost:3001/api
 ## AutoCoder Status
 
 - [x] Specification created
-- [x] Features initialized (155 tests)
-- [ ] Development in progress
+- [x] Features initialized (148 tests)
+- [x] Development in progress (some features implemented)
 
 ### Feature Categories
 - Security & Access Control

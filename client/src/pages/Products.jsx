@@ -111,6 +111,22 @@ function Products() {
     fetchProducts();
   }, []);
 
+  // Map snake_case API response to camelCase for frontend
+  const mapProductFromApi = (product) => ({
+    id: product.id,
+    name: product.name,
+    category: product.category_id ? `Category ${product.category_id}` : 'Flower', // Simplified since categories are IDs
+    strain: product.strain_type || 'Hybrid',
+    thcContent: product.thc_percent || 0,
+    cbdContent: product.cbd_percent || 0,
+    price: product.price || 0,
+    unitPrice: product.sale_price || product.price || 0,
+    unit: product.weight_unit || 'gram',
+    stock: product.stock_quantity || 0,
+    status: product.is_active ? 'active' : 'inactive',
+    sku: product.sku
+  });
+
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -118,10 +134,14 @@ function Products() {
       const response = await axios.get('/api/products', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setProducts(response.data.products || response.data);
-    } catch {
-      // Use mock data for development
-      setProducts(mockProducts);
+      const rawProducts = response.data.products || response.data || [];
+      // Map API response to frontend format
+      const mappedProducts = rawProducts.map(mapProductFromApi);
+      setProducts(mappedProducts);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      // Use empty array if API fails
+      setProducts([]);
     } finally {
       setLoading(false);
     }

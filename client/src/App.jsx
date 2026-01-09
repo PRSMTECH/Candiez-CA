@@ -7,9 +7,11 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
+import CustomerNew from './pages/CustomerNew';
 import CustomerEdit from './pages/CustomerEdit';
 import POS from './pages/POS';
 import Products from './pages/Products';
+import ProductNew from './pages/ProductNew';
 import ProductEdit from './pages/ProductEdit';
 import Inventory from './pages/Inventory';
 import Transactions from './pages/Transactions';
@@ -39,8 +41,10 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/pos" element={<POS />} />
             <Route path="/customers" element={<Customers />} />
+            <Route path="/customers/new" element={<CustomerNew />} />
             <Route path="/customers/:id/edit" element={<CustomerEdit />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/products/new" element={<ProductNew />} />
             <Route path="/products/:id/edit" element={<ProductEdit />} />
 
             {/* Manager and Admin only */}
