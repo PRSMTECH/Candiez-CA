@@ -3,6 +3,7 @@
 **Project**: Candiez-CA
 **Last Updated**: 2026-01-09
 **Status**: In Development
+**Production URL**: https://candiez.shop
 
 ## Overview
 CRM and inventory management system for a California marijuana dispensary. Features a candy-themed purple/lavender design, role-based access control, points-based loyalty program, and comprehensive inventory tracking.

@@ -2,6 +2,8 @@
 
 CRM and inventory management system for a California marijuana dispensary. Features candy-themed purple/lavender design, role-based access control, points-based loyalty program, and comprehensive inventory tracking.
 
+**Production URL**: https://candiez.shop
+
 ## Build Commands
 
 ```bash

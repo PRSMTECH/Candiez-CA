@@ -15,6 +15,10 @@
   A playful, candy-themed purple/lavender system for customer management, inventory tracking, and point-of-sale operations.
 </p>
 
+<p align="center">
+  <a href="https://candiez.shop"><strong>candiez.shop</strong></a>
+</p>
+
 ---
 
 ## Overview
