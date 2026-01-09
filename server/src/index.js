@@ -309,6 +309,14 @@ app.post('/api/customers', authenticate, (req, res) => {
       return res.status(400).json({ error: 'First name and last name are required' });
     }
 
+    // Check for duplicate email
+    if (email) {
+      const existingEmail = db.prepare('SELECT id FROM customers WHERE email = ?').get(email);
+      if (existingEmail) {
+        return res.status(400).json({ error: 'A customer with this email already exists' });
+      }
+    }
+
     const result = db.prepare(`
       INSERT INTO customers (
         first_name, last_name, email, phone, date_of_birth,
@@ -344,6 +352,14 @@ app.put('/api/customers/:id', authenticate, (req, res) => {
       medical_card_number, medical_card_expiry, address, city, state, zip,
       photo_url, notes, tags, preferences, loyalty_points, loyalty_tier, status
     } = req.body;
+
+    // Check for duplicate email (if changing email and not to the same one)
+    if (email && email !== existing.email) {
+      const existingEmail = db.prepare('SELECT id FROM customers WHERE email = ? AND id != ?').get(email, req.params.id);
+      if (existingEmail) {
+        return res.status(400).json({ error: 'A customer with this email already exists' });
+      }
+    }
 
     db.prepare(`
       UPDATE customers SET

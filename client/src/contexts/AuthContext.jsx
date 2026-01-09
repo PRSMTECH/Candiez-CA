@@ -19,6 +19,9 @@ export function AuthProvider({ children }) {
     }
 
     try {
+      // Set default auth header for all requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       const response = await axios.get('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
