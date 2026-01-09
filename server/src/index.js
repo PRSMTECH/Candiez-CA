@@ -1,3 +1,4 @@
+// Fixed datetime quotes for SQLite compatibility
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -293,6 +294,44 @@ app.get('/api/customers/:id', authenticate, (req, res) => {
   } catch (error) {
     console.error('Get customer error:', error);
     res.status(500).json({ error: 'Failed to fetch customer' });
+  }
+});
+
+// Get customer loyalty history
+app.get('/api/customers/:id/loyalty', authenticate, (req, res) => {
+  try {
+    const customerId = req.params.id;
+
+    // Check customer exists
+    const customer = db.prepare('SELECT id, loyalty_points FROM customers WHERE id = ?').get(customerId);
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    // Get loyalty points earned from transactions
+    const history = db.prepare(`
+      SELECT
+        t.id,
+        t.transaction_number,
+        t.loyalty_points_earned as points,
+        t.total as total_amount,
+        t.created_at,
+        'earned' as type,
+        'Points earned from purchase' as description
+      FROM transactions t
+      WHERE t.customer_id = ? AND t.voided = 0 AND t.loyalty_points_earned > 0
+      ORDER BY t.created_at DESC
+      LIMIT 50
+    `).all(customerId);
+
+    res.json({
+      customer_id: customerId,
+      current_balance: customer.loyalty_points || 0,
+      history
+    });
+  } catch (error) {
+    console.error('Get loyalty history error:', error);
+    res.status(500).json({ error: 'Failed to fetch loyalty history' });
   }
 });
 
@@ -616,7 +655,7 @@ app.delete('/api/products/:id', authenticate, authorize('admin'), (req, res) => 
     }
 
     // Soft delete by setting is_active to 0
-    db.prepare('UPDATE products SET is_active = 0, updated_at = datetime("now") WHERE id = ?')
+    db.prepare("UPDATE products SET is_active = 0, updated_at = datetime('now') WHERE id = ?")
       .run(req.params.id);
 
     res.json({ message: 'Product deleted successfully' });
@@ -668,6 +707,62 @@ app.post('/api/categories', authenticate, authorize('admin', 'manager'), (req, r
   }
 });
 
+// Update category (admin/manager only)
+app.put('/api/categories/:id', authenticate, authorize('admin', 'manager'), (req, res) => {
+  try {
+    const { name, slug, description, parent_id, sort_order } = req.body;
+    const existing = db.prepare('SELECT * FROM categories WHERE id = ?').get(req.params.id);
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    db.prepare(`
+      UPDATE categories SET
+        name = COALESCE(?, name),
+        slug = COALESCE(?, slug),
+        description = COALESCE(?, description),
+        parent_id = COALESCE(?, parent_id),
+        sort_order = COALESCE(?, sort_order),
+        updated_at = datetime('now')
+      WHERE id = ?
+    `).run(name, slug, description, parent_id, sort_order, req.params.id);
+
+    const category = db.prepare('SELECT * FROM categories WHERE id = ?').get(req.params.id);
+    res.json({ category, message: 'Category updated successfully' });
+  } catch (error) {
+    console.error('Update category error:', error);
+    res.status(500).json({ error: 'Failed to update category' });
+  }
+});
+
+// Delete category (admin only)
+app.delete('/api/categories/:id', authenticate, authorize('admin'), (req, res) => {
+  try {
+    const existing = db.prepare('SELECT * FROM categories WHERE id = ?').get(req.params.id);
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    // Check if any products use this category
+    const productsUsingCategory = db.prepare('SELECT COUNT(*) as count FROM products WHERE category_id = ?').get(req.params.id);
+    if (productsUsingCategory.count > 0) {
+      return res.status(400).json({
+        error: 'Cannot delete category',
+        message: `${productsUsingCategory.count} product(s) are using this category. Please reassign them first.`
+      });
+    }
+
+    // Soft delete by setting is_active to 0
+    db.prepare("UPDATE categories SET is_active = 0, updated_at = datetime('now') WHERE id = ?").run(req.params.id);
+    res.json({ message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('Delete category error:', error);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
 // ==========================================
 // TRANSACTION ENDPOINTS
 // ==========================================
@@ -678,7 +773,7 @@ app.get('/api/transactions', authenticate, authorize('admin', 'manager'), (req, 
     const { page = 1, limit = 20, start_date, end_date, customer_id, payment_method } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    let whereClause = 'voided = 0';
+    let whereClause = '1=1';
     const params = [];
 
     if (start_date) {
@@ -806,16 +901,19 @@ app.post('/api/transactions', authenticate, (req, res) => {
     const totalDiscount = discount_amount || 0;
     const total = subtotal + taxAmount - totalDiscount;
 
+    // Calculate loyalty points earned
+    const loyaltyPointsEarned = customer_id ? Math.floor(total) : 0; // 1 point per dollar
+
     // Create transaction
     const transactionNumber = generateTransactionNumber();
     const result = db.prepare(`
       INSERT INTO transactions (
         transaction_number, customer_id, user_id, subtotal, tax_amount,
-        discount_amount, loyalty_points_used, total, payment_method, payment_status, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?)
+        discount_amount, loyalty_points_used, loyalty_points_earned, total, payment_method, payment_status, notes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?)
     `).run(
       transactionNumber, customer_id || null, req.user.id, subtotal, taxAmount,
-      totalDiscount, loyalty_points_used || 0, total, payment_method || 'cash', notes || null
+      totalDiscount, loyalty_points_used || 0, loyaltyPointsEarned, total, payment_method || 'cash', notes || null
     );
 
     const transactionId = result.lastInsertRowid;
@@ -838,17 +936,44 @@ app.post('/api/transactions', authenticate, (req, res) => {
 
     // Update customer loyalty points if applicable
     if (customer_id) {
-      const pointsEarned = Math.floor(total); // 1 point per dollar
-      db.prepare(`
-        UPDATE customers SET loyalty_points = loyalty_points + ?, updated_at = datetime('now')
-        WHERE id = ?
-      `).run(pointsEarned, customer_id);
+      // Calculate net points change (earned - used)
+      const pointsUsed = loyalty_points_used || 0;
+      const netPointsChange = loyaltyPointsEarned - pointsUsed;
 
-      // Record loyalty transaction
       db.prepare(`
-        INSERT INTO loyalty_transactions (customer_id, transaction_id, points_earned, reason)
-        VALUES (?, ?, ?, 'Purchase')
-      `).run(customer_id, transactionId, pointsEarned);
+        UPDATE customers SET loyalty_points = MAX(0, loyalty_points + ?), updated_at = datetime('now')
+        WHERE id = ?
+      `).run(netPointsChange, customer_id);
+
+      // Record loyalty transaction for points earned
+      if (loyaltyPointsEarned > 0) {
+        db.prepare(`
+          INSERT INTO loyalty_transactions (customer_id, transaction_id, points_earned, reason)
+          VALUES (?, ?, ?, 'Purchase')
+        `).run(customer_id, transactionId, loyaltyPointsEarned);
+      }
+
+      // Record loyalty transaction for points redeemed
+      if (pointsUsed > 0) {
+        db.prepare(`
+          INSERT INTO loyalty_transactions (customer_id, transaction_id, points_earned, reason)
+          VALUES (?, ?, ?, 'Points Redemption')
+        `).run(customer_id, transactionId, -pointsUsed);
+      }
+
+      // Update customer loyalty tier based on total points
+      const customer = db.prepare('SELECT loyalty_points FROM customers WHERE id = ?').get(customer_id);
+      if (customer) {
+        let newTier = 'bronze';
+        if (customer.loyalty_points >= 5000) {
+          newTier = 'platinum';
+        } else if (customer.loyalty_points >= 1500) {
+          newTier = 'gold';
+        } else if (customer.loyalty_points >= 500) {
+          newTier = 'silver';
+        }
+        db.prepare('UPDATE customers SET loyalty_tier = ? WHERE id = ?').run(newTier, customer_id);
+      }
     }
 
     const transaction = db.prepare('SELECT * FROM transactions WHERE id = ?').get(transactionId);
@@ -879,7 +1004,7 @@ app.post('/api/transactions/:id/void', authenticate, authorize('admin', 'manager
     // Void the transaction
     db.prepare(`
       UPDATE transactions SET
-        voided = 1, voided_by = ?, voided_at = datetime('now'), void_reason = ?, updated_at = datetime('now')
+        voided = 1, payment_status = 'voided', voided_by = ?, voided_at = datetime('now'), void_reason = ?, updated_at = datetime('now')
       WHERE id = ?
     `).run(req.user.id, reason || null, req.params.id);
 
@@ -887,6 +1012,120 @@ app.post('/api/transactions/:id/void', authenticate, authorize('admin', 'manager
   } catch (error) {
     console.error('Void transaction error:', error);
     res.status(500).json({ error: 'Failed to void transaction' });
+  }
+});
+
+// Refund transaction (admin/manager only)
+app.post('/api/transactions/:id/refund', authenticate, authorize('admin', 'manager'), (req, res) => {
+  try {
+    const { reason, items } = req.body;
+    // items is an array of { transaction_item_id, quantity } for partial refunds
+
+    const transaction = db.prepare('SELECT * FROM transactions WHERE id = ? AND payment_status = ?').get(req.params.id, 'completed');
+
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found or not eligible for refund' });
+    }
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'At least one item must be selected for refund' });
+    }
+
+    // Get transaction items
+    const transactionItems = db.prepare('SELECT * FROM transaction_items WHERE transaction_id = ?').all(req.params.id);
+    const itemsMap = new Map(transactionItems.map(i => [i.id, i]));
+
+    let refundSubtotal = 0;
+    const refundedItems = [];
+
+    for (const refundItem of items) {
+      const originalItem = itemsMap.get(refundItem.transaction_item_id);
+      if (!originalItem) {
+        return res.status(400).json({ error: `Invalid transaction item ID: ${refundItem.transaction_item_id}` });
+      }
+
+      const refundQty = Math.min(refundItem.quantity, originalItem.quantity);
+      if (refundQty <= 0) continue;
+
+      const itemRefundAmount = (originalItem.unit_price * refundQty);
+      refundSubtotal += itemRefundAmount;
+
+      refundedItems.push({
+        product_id: originalItem.product_id,
+        quantity: refundQty,
+        amount: itemRefundAmount
+      });
+
+      // Restore inventory
+      db.prepare('UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?')
+        .run(refundQty, originalItem.product_id);
+    }
+
+    // Calculate refund amount with tax
+    const taxRate = 0.0775;
+    const refundTax = refundSubtotal * taxRate;
+    const totalRefund = refundSubtotal + refundTax;
+
+    // Create refund record
+    const refundNumber = `REF-${generateTransactionNumber().split('-')[1]}`;
+    const refundResult = db.prepare(`
+      INSERT INTO refunds (original_transaction_id, refund_number, subtotal, tax_amount, total, reason, processed_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(req.params.id, refundNumber, refundSubtotal, refundTax, totalRefund, reason || null, req.user.id);
+
+    const refundId = refundResult.lastInsertRowid;
+
+    // Record refunded items
+    for (const item of refundedItems) {
+      db.prepare(`
+        INSERT INTO refund_items (refund_id, product_id, quantity, refund_amount)
+        VALUES (?, ?, ?, ?)
+      `).run(refundId, item.product_id, item.quantity, item.amount);
+    }
+
+    // Update transaction payment_status if fully refunded
+    const remainingValue = transaction.total - totalRefund;
+    if (remainingValue <= 0.01) { // Allow small rounding difference
+      db.prepare(`
+        UPDATE transactions SET payment_status = 'refunded', updated_at = datetime('now')
+        WHERE id = ?
+      `).run(req.params.id);
+    } else {
+      db.prepare(`
+        UPDATE transactions SET payment_status = 'partial_refund', updated_at = datetime('now')
+        WHERE id = ?
+      `).run(req.params.id);
+    }
+
+    // Reverse loyalty points if customer exists
+    if (transaction.customer_id) {
+      const pointsToReverse = Math.floor(totalRefund);
+      db.prepare(`
+        UPDATE customers SET loyalty_points = MAX(0, loyalty_points - ?), updated_at = datetime('now')
+        WHERE id = ?
+      `).run(pointsToReverse, transaction.customer_id);
+
+      // Record loyalty reversal
+      db.prepare(`
+        INSERT INTO loyalty_transactions (customer_id, transaction_id, points_earned, reason)
+        VALUES (?, ?, ?, 'Refund')
+      `).run(transaction.customer_id, req.params.id, -pointsToReverse);
+    }
+
+    res.json({
+      message: 'Refund processed successfully',
+      refund: {
+        id: refundId,
+        refund_number: refundNumber,
+        subtotal: refundSubtotal,
+        tax_amount: refundTax,
+        total: totalRefund,
+        items: refundedItems
+      }
+    });
+  } catch (error) {
+    console.error('Refund transaction error:', error);
+    res.status(500).json({ error: 'Failed to process refund' });
   }
 });
 
@@ -951,6 +1190,36 @@ app.post('/api/inventory/adjust', authenticate, authorize('admin', 'manager'), (
   } catch (error) {
     console.error('Inventory adjustment error:', error);
     res.status(500).json({ error: 'Failed to adjust inventory' });
+  }
+});
+
+// Get inventory adjustment history
+app.get('/api/inventory/adjustments', authenticate, authorize('admin', 'manager'), (req, res) => {
+  try {
+    const { product_id, limit = 50 } = req.query;
+
+    let query = `
+      SELECT ia.*, p.name as product_name, p.sku as product_sku,
+        u.first_name || ' ' || u.last_name as user_name
+      FROM inventory_adjustments ia
+      LEFT JOIN products p ON ia.product_id = p.id
+      LEFT JOIN users u ON ia.user_id = u.id
+    `;
+
+    const params = [];
+    if (product_id) {
+      query += ' WHERE ia.product_id = ?';
+      params.push(product_id);
+    }
+
+    query += ' ORDER BY ia.created_at DESC LIMIT ?';
+    params.push(parseInt(limit));
+
+    const adjustments = db.prepare(query).all(...params);
+    res.json({ adjustments });
+  } catch (error) {
+    console.error('Get adjustments error:', error);
+    res.status(500).json({ error: 'Failed to fetch adjustment history' });
   }
 });
 
@@ -1190,7 +1459,7 @@ app.delete('/api/users/:id', authenticate, authorize('admin'), (req, res) => {
     }
 
     // Soft delete
-    db.prepare('UPDATE users SET status = "inactive", updated_at = datetime("now") WHERE id = ?')
+    db.prepare("UPDATE users SET status = 'inactive', updated_at = datetime('now') WHERE id = ?")
       .run(req.params.id);
 
     res.json({ message: 'User deleted successfully' });

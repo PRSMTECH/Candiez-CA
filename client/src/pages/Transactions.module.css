@@ -225,6 +225,340 @@
   color: white;
 }
 
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.voidButton {
+  padding: 0.5rem 0.75rem;
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid var(--color-error, #e74c3c);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-error, #e74c3c);
+}
+
+.voidButton:hover {
+  background: var(--color-error, #e74c3c);
+  color: white;
+}
+
+/* Void Modal Styles */
+.voidModal {
+  padding: 0.5rem;
+}
+
+.voidWarning {
+  background: var(--color-error-light, #fde2e2);
+  color: var(--color-error, #e74c3c);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.voidInfo {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.voidNote {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.voidForm {
+  margin-bottom: 1.5rem;
+}
+
+.voidLabel {
+  display: block;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.voidTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.voidTextarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.voidActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.voidCancelBtn {
+  padding: 0.75rem 1.25rem;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voidCancelBtn:hover:not(:disabled) {
+  background: var(--color-bg-light);
+}
+
+.voidCancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.voidConfirmBtn {
+  padding: 0.75rem 1.25rem;
+  background: var(--color-error, #e74c3c);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voidConfirmBtn:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+.voidConfirmBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Refund Button Styles */
+.refundButton {
+  padding: 0.5rem 0.75rem;
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid var(--color-info, #3498db);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-info, #3498db);
+}
+
+.refundButton:hover {
+  background: var(--color-info, #3498db);
+  color: white;
+}
+
+/* Refund Modal Styles */
+.refundModal {
+  padding: 0.5rem;
+}
+
+.refundInfo {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.refundItemsSection {
+  margin-bottom: 1rem;
+}
+
+.refundLabel {
+  display: block;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.loadingText,
+.emptyText {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-style: italic;
+  padding: 1rem;
+  text-align: center;
+}
+
+.refundItemsList {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.refundItem {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.refundItem:last-child {
+  border-bottom: none;
+}
+
+.refundItem:hover {
+  background: var(--color-bg-light);
+}
+
+.refundItemCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.refundItemCheckbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.refundItemName {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.refundItemDetails {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.refundItemPrice {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.refundQuantityWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.refundQuantityInput {
+  width: 3rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.refundMaxQty {
+  color: var(--color-text-secondary);
+}
+
+.refundTotalSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.refundForm {
+  margin-bottom: 1rem;
+}
+
+.refundTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.refundTextarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.refundNote {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.refundActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.refundCancelBtn {
+  padding: 0.75rem 1.25rem;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refundCancelBtn:hover:not(:disabled) {
+  background: var(--color-bg-light);
+}
+
+.refundCancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refundConfirmBtn {
+  padding: 0.75rem 1.25rem;
+  background: var(--color-info, #3498db);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refundConfirmBtn:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.refundConfirmBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .loading,
 .empty {
   text-align: center;

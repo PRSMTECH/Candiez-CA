@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -10,9 +10,11 @@ function ProductNew() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Flower',
+    category_id: '',
     strain: 'Hybrid',
     thcContent: 0,
     cbdContent: 0,
@@ -24,6 +26,22 @@ function ProductNew() {
     description: '',
     supplier: ''
   });
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('/api/categories');
+        setCategories(response.data.categories || []);
+      } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        setCategories([]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
@@ -64,6 +82,7 @@ function ProductNew() {
         sku: sku,
         name: formData.name,
         description: formData.description,
+        category_id: formData.category_id ? parseInt(formData.category_id) : null,
         strain_type: formData.strain.toLowerCase(),
         thc_percent: formData.thcContent,
         cbd_percent: formData.cbdContent,
@@ -135,22 +154,21 @@ function ProductNew() {
               />
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="category" className={styles.label}>Category</label>
+              <label htmlFor="category_id" className={styles.label}>Category</label>
               <select
-                id="category"
-                name="category"
-                value={formData.category}
+                id="category_id"
+                name="category_id"
+                value={formData.category_id}
                 onChange={handleChange}
                 className={styles.select}
+                disabled={loadingCategories}
               >
-                <option value="Flower">Flower</option>
-                <option value="Pre-Rolls">Pre-Rolls</option>
-                <option value="Vape">Vape</option>
-                <option value="Edibles">Edibles</option>
-                <option value="Tinctures">Tinctures</option>
-                <option value="Topicals">Topicals</option>
-                <option value="Concentrates">Concentrates</option>
-                <option value="Accessories">Accessories</option>
+                <option value="">
+                  {loadingCategories ? 'Loading categories...' : 'Select a category'}
+                </option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
               </select>
             </div>
           </div>

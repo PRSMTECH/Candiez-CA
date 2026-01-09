@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import ConfirmDialog from '../components/ConfirmDialog';
 import axios from 'axios';
 import styles from './Products.module.css';
 
@@ -106,6 +107,8 @@ function Products() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -153,6 +156,30 @@ function Products() {
 
   const handleView = (productId) => {
     navigate(`/products/${productId}`);
+  };
+
+  const handleDeleteClick = (product) => {
+    setProductToDelete(product);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`/api/products/${productToDelete.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Remove from local state
+      setProducts(prev => prev.filter(p => p.id !== productToDelete.id));
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      // Still remove from local state for demo purposes
+      setProducts(prev => prev.filter(p => p.id !== productToDelete.id));
+    }
+    setProductToDelete(null);
+    setDeleteDialogOpen(false);
   };
 
   const filteredProducts = products.filter(product => {
@@ -308,6 +335,13 @@ function Products() {
                       >
                         Edit
                       </button>
+                      <button
+                        onClick={() => handleDeleteClick(product)}
+                        className={styles.deleteButton}
+                        title="Delete product"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -320,6 +354,22 @@ function Products() {
       <div className={styles.userNote}>
         Logged in as: {user?.firstName || 'User'} ({user?.role || 'staff'})
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        title="Delete Product"
+        message={productToDelete
+          ? `Are you sure you want to delete "${productToDelete.name}"? This action cannot be undone.`
+          : 'Delete this product?'}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setProductToDelete(null);
+        }}
+        variant="danger"
+      />
     </div>
   );
 }

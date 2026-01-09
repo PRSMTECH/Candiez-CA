@@ -17,6 +17,8 @@ function POS() {
   const [processing, setProcessing] = useState(false);
   const [receipt, setReceipt] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [showRedeemInput, setShowRedeemInput] = useState(false);
 
   // Fetch products and customers on mount
   useEffect(() => {
@@ -94,13 +96,22 @@ function POS() {
   const clearCart = useCallback(() => {
     setCart([]);
     setSelectedCustomer(null);
+    setPointsToRedeem(0);
+    setShowRedeemInput(false);
   }, []);
 
   // Calculate totals
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const taxRate = 0.0775; // California cannabis tax
   const taxAmount = subtotal * taxRate;
-  const total = subtotal + taxAmount;
+  // Points discount: 1 point = $0.01
+  const pointsDiscount = pointsToRedeem * 0.01;
+  const total = Math.max(0, subtotal + taxAmount - pointsDiscount);
+
+  // Max points that can be redeemed (can't exceed subtotal + tax or customer's points)
+  const maxRedeemablePoints = selectedCustomer
+    ? Math.min(selectedCustomer.loyalty_points || 0, Math.floor((subtotal + taxAmount) * 100))
+    : 0;
 
   // Process checkout
   const handleCheckout = async () => {
@@ -115,8 +126,8 @@ function POS() {
           quantity: item.quantity
         })),
         payment_method: paymentMethod,
-        discount_amount: 0,
-        loyalty_points_used: 0,
+        discount_amount: pointsDiscount,
+        loyalty_points_used: pointsToRedeem,
         notes: null
       };
 
@@ -128,12 +139,16 @@ function POS() {
         total: response.data.transaction.total,
         items: cart,
         customer: selectedCustomer,
-        paymentMethod
+        paymentMethod,
+        pointsUsed: pointsToRedeem,
+        pointsDiscount: pointsDiscount
       });
 
       // Clear cart after successful transaction
       setCart([]);
       setSelectedCustomer(null);
+      setPointsToRedeem(0);
+      setShowRedeemInput(false);
 
       // Refresh products to update stock levels
       const productsRes = await axios.get('/api/products');
@@ -314,6 +329,57 @@ function POS() {
           )}
         </div>
 
+        {/* Loyalty Points Redemption */}
+        {selectedCustomer && selectedCustomer.loyalty_points > 0 && cart.length > 0 && (
+          <div className={styles.redeemSection}>
+            {!showRedeemInput ? (
+              <button
+                className={styles.redeemBtn}
+                onClick={() => setShowRedeemInput(true)}
+              >
+                🎁 Redeem Points ({selectedCustomer.loyalty_points} available)
+              </button>
+            ) : (
+              <div className={styles.redeemInputWrapper}>
+                <label className={styles.redeemLabel}>Points to redeem (max {maxRedeemablePoints}):</label>
+                <div className={styles.redeemControls}>
+                  <input
+                    type="number"
+                    className={styles.redeemInput}
+                    value={pointsToRedeem}
+                    onChange={(e) => {
+                      const val = Math.min(maxRedeemablePoints, Math.max(0, parseInt(e.target.value) || 0));
+                      setPointsToRedeem(val);
+                    }}
+                    min="0"
+                    max={maxRedeemablePoints}
+                  />
+                  <button
+                    className={styles.redeemMaxBtn}
+                    onClick={() => setPointsToRedeem(maxRedeemablePoints)}
+                  >
+                    Max
+                  </button>
+                  <button
+                    className={styles.redeemCancelBtn}
+                    onClick={() => {
+                      setPointsToRedeem(0);
+                      setShowRedeemInput(false);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+                {pointsToRedeem > 0 && (
+                  <div className={styles.redeemValue}>
+                    Discount: -${pointsDiscount.toFixed(2)}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Cart Items */}
         <div className={styles.cartItems}>
           {cart.length === 0 ? (
@@ -368,6 +434,12 @@ function POS() {
               <span>Tax (7.75%)</span>
               <span className={styles.totalValue}>${taxAmount.toFixed(2)}</span>
             </div>
+            {pointsToRedeem > 0 && (
+              <div className={`${styles.totalRow} ${styles.discount}`}>
+                <span>Points Discount ({pointsToRedeem} pts)</span>
+                <span className={styles.discountValue}>-${pointsDiscount.toFixed(2)}</span>
+              </div>
+            )}
             <div className={`${styles.totalRow} ${styles.grand}`}>
               <span>Total</span>
               <span className={styles.totalValue}>${total.toFixed(2)}</span>

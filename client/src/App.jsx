@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import CustomerNew from './pages/CustomerNew';
 import CustomerEdit from './pages/CustomerEdit';
+import CustomerDetail from './pages/CustomerDetail';
 import POS from './pages/POS';
 import Products from './pages/Products';
 import ProductNew from './pages/ProductNew';
@@ -18,6 +19,7 @@ import Transactions from './pages/Transactions';
 import TransactionDetail from './pages/TransactionDetail';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
+import Categories from './pages/Categories';
 import Users from './pages/admin/Users';
 import NotFound from './pages/NotFound';
 
@@ -42,10 +44,12 @@ function App() {
             <Route path="/pos" element={<POS />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/customers/new" element={<CustomerNew />} />
+            <Route path="/customers/:id" element={<CustomerDetail />} />
             <Route path="/customers/:id/edit" element={<CustomerEdit />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/new" element={<ProductNew />} />
             <Route path="/products/:id/edit" element={<ProductEdit />} />
+            <Route path="/categories" element={<Categories />} />
 
             {/* Manager and Admin only */}
             <Route

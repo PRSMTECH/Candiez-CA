@@ -420,3 +420,134 @@ January 9, 2026
 ---
 End of Coding Agent Session 3
 January 9, 2026
+
+---
+
+# Coding Agent Session 4
+# Date: January 9, 2026
+# Mode: Standard (with Playwright testing)
+
+## SESSION SUMMARY
+
+### Feature #32 Completed: Inventory adjustment creates real records
+
+**What was implemented:**
+
+1. **Full Inventory Management** (`client/src/pages/Inventory.jsx`) - COMPLETE REWRITE
+   - Product inventory table with stock levels and thresholds
+   - Search and filter by stock status (All, In Stock, Low Stock, Out of Stock)
+   - Stock statistics header (Total Products, Low Stock, Out of Stock counts)
+   - Adjustment modal with type selection (Add/Remove/Damage/Count Correction)
+   - Real-time preview of new stock level
+   - Reason selection (Received, Return, Damaged, Expired, Theft, etc.)
+   - Optional notes field
+   - History modal showing adjustment log
+
+2. **Inventory Styling** (`client/src/pages/Inventory.module.css`) - NEW FILE
+   - Candy-themed purple/lavender design
+   - Statistics boxes with gradient backgrounds
+   - Stock status badges (In Stock=green, Low=yellow, Out=red)
+   - Form styling for adjustment modal
+   - History panel with +/- change indicators
+
+3. **Modal Fix** (`client/src/pages/Inventory.jsx`)
+   - Fixed modal not appearing by adding `isOpen` prop to Modal component
+
+4. **API Endpoint** (`server/src/index.js`) - Added GET /api/inventory/adjustments
+   - Fetches adjustment history for a product
+   - Joins with products and users tables for names
+   - Supports filtering by product_id
+   - Orders by date descending
+
+**Testing Verified:**
+- Navigated to Inventory, saw 3 products with stock levels
+- WorkflowProduct: 98 stock, 10 threshold
+- Clicked "Adjust" button → Modal appeared
+- Selected "Remove Stock (Adjustment)" type
+- Entered quantity: 10
+- Selected reason: "Inventory Count Correction"
+- Added note: "Feature 32 test - inventory count correction"
+- Saved adjustment → Stock updated from 98 to 88
+- Clicked "History" → Saw adjustment log with:
+  - Type: remove
+  - Reason: count_correction
+  - Notes: Feature 32 test - inventory count correction
+  - By: Admin User • Jan 9, 2026, 03:33 AM
+  - Change: -10
+- Screenshot saved: feature32-inventory-adjustment-history.png
+
+### Current Progress
+- Features: 31/155 passing (20.0%)
+- Feature #32 marked as PASSING
+
+### Next Steps for Next Session
+1. Get next feature with `feature_get_next`
+2. Continue with remaining features (124 remaining)
+3. Reports page implementation
+4. Settings page with business configuration
+
+---
+End of Coding Agent Session 4
+January 9, 2026
+
+
+---
+
+# Coding Agent Session 5
+# Date: January 9, 2026
+# Mode: Standard (with Playwright testing)
+
+## SESSION SUMMARY
+
+### Features Completed This Session
+
+#### Feature #78: Back button after submit no re-submit
+**Status: PASSED**
+- Verified form submission workflow for customer creation
+- After submitting form, pressing browser back button shows blank form
+- No duplicate records created
+
+#### Feature #79: Delete customer removes from all views
+**Status: PASSED**
+- Created test customer "DeleteTest CascadeF79"
+- Completed transaction for customer ($48.49 total)
+- Deleted customer via Customers page
+- Verified customer removed from customer list (count dropped from 20 to 19)
+- Verified transaction history preserved (shows customer name for historical records)
+- Verified POS dropdown no longer shows deleted customer
+
+#### Feature #80: Delete product updates inventory views
+**Status: PASSED**
+- Bug fixed: SQLite datetime quote syntax error in product deletion
+- Original code: datetime("now") inside single-quoted SQL string caused SqliteError: no such column: now
+- Fixed to: datetime('now') inside double-quoted SQL string
+- Fixed same pattern in 3 locations (products, categories, users deletion)
+- Deleted test product "DELETE_ME_Product"
+- Verified removed from Products list (count dropped from 4 to 3)
+- Verified removed from Inventory view (count updated)
+- Verified not searchable in POS product grid
+
+### Bug Fixed This Session
+
+**SQLite datetime syntax error** in server/src/index.js:
+- Lines affected: 657 (products), 757 (categories), 1461 (users)
+- Issue: Using datetime("now") inside single-quoted SQL string
+- SQLite interpreted the double quotes as column identifier, not string delimiter
+- Fix: Changed outer quotes to double quotes, inner quotes to single quotes
+
+### Current Progress
+- Features: 59/163 passing (36.2%)
+- Session started at: 56/163 (34.4%)
+- Session gained: 3 features
+
+### Files Modified
+- server/src/index.js - Fixed datetime quotes in 3 delete endpoints
+
+### Next Steps for Next Session
+1. Get next feature with feature_get_next
+2. Continue with remaining features (104 remaining)
+3. Minor: Fix onClose is not a function console error in ConfirmModal
+
+---
+End of Coding Agent Session 5
+January 9, 2026

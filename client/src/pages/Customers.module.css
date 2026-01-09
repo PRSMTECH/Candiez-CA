@@ -177,10 +177,47 @@
   color: var(--color-text-secondary);
 }
 
+.loyaltyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .loyaltyPoints {
   font-family: var(--font-mono);
   font-weight: 600;
   color: var(--color-primary);
+}
+
+.loyaltyTier {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: fit-content;
+}
+
+.tierBronze {
+  background: #cd7f32;
+  color: white;
+}
+
+.tierSilver {
+  background: #c0c0c0;
+  color: #333;
+}
+
+.tierGold {
+  background: #ffd700;
+  color: #333;
+}
+
+.tierPlatinum {
+  background: linear-gradient(135deg, #e5e4e2, #a0a0a0);
+  color: #333;
 }
 
 .purchases {

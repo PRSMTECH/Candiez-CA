@@ -295,6 +295,99 @@
   padding: 0.25rem;
 }
 
+/* Loyalty Points Redemption */
+.redeemSection {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-primary-light);
+  background: linear-gradient(135deg, rgba(181, 126, 220, 0.1) 0%, rgba(255, 182, 193, 0.1) 100%);
+}
+
+.redeemBtn {
+  width: 100%;
+  padding: 0.6rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-pink) 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.redeemBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(181, 126, 220, 0.3);
+}
+
+.redeemInputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.redeemLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.redeemControls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.redeemInput {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid var(--color-primary-light);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.redeemInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.redeemMaxBtn {
+  padding: 0.5rem 0.75rem;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.redeemMaxBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.redeemCancelBtn {
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-primary-light);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.redeemCancelBtn:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.redeemValue {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-success);
+  font-size: 0.9rem;
+}
+
 /* Cart Items */
 .cartItems {
   flex: 1;
@@ -419,8 +512,21 @@
   color: var(--color-primary-dark);
 }
 
+.totalRow.discount {
+  color: var(--color-success);
+  background: rgba(34, 197, 94, 0.1);
+  margin: 0.25rem -1rem;
+  padding: 0.4rem 1rem;
+}
+
 .totalValue {
   font-family: var(--font-mono);
+}
+
+.discountValue {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-success);
 }
 
 /* Payment Section */

@@ -135,6 +135,7 @@ export function initializeDatabase() {
       tax_amount REAL NOT NULL,
       discount_amount REAL DEFAULT 0,
       loyalty_points_used INTEGER DEFAULT 0,
+      loyalty_points_earned INTEGER DEFAULT 0,
       total REAL NOT NULL,
       payment_method TEXT,
       payment_status TEXT DEFAULT 'pending',
@@ -227,6 +228,44 @@ export function initializeDatabase() {
       FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `);
+
+  // Refunds table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS refunds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      original_transaction_id INTEGER NOT NULL,
+      refund_number TEXT UNIQUE NOT NULL,
+      subtotal REAL NOT NULL,
+      tax_amount REAL NOT NULL,
+      total REAL NOT NULL,
+      reason TEXT,
+      processed_by INTEGER NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (original_transaction_id) REFERENCES transactions(id),
+      FOREIGN KEY (processed_by) REFERENCES users(id)
+    )
+  `);
+
+  // Refund items table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS refund_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      refund_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      refund_amount REAL NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (refund_id) REFERENCES refunds(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    )
+  `);
+
+  // Migration: Add loyalty_points_earned column if missing
+  try {
+    db.exec(`ALTER TABLE transactions ADD COLUMN loyalty_points_earned INTEGER DEFAULT 0`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
 
   // Create indexes for common queries
   db.exec(`

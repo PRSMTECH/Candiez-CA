@@ -1,0 +1,417 @@
+/* CustomerDetail.module.css - Customer Detail Page Styles */
+
+.container {
+  padding: 1rem;
+}
+
+.loading,
+.notFound {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.headerContent h1 {
+  font-size: 1.75rem;
+  color: var(--color-primary-dark);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.backLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: var(--color-primary-dark);
+}
+
+.headerMeta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusBadge.active {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--color-success);
+}
+
+.statusBadge.inactive {
+  background: rgba(158, 158, 158, 0.15);
+  color: #666;
+}
+
+.statusBadge.vip {
+  background: rgba(181, 126, 220, 0.15);
+  color: var(--color-primary);
+}
+
+.statusBadge.new {
+  background: rgba(33, 150, 243, 0.15);
+  color: #1976d2;
+}
+
+.customerId {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.editBtn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.editBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(181, 126, 220, 0.3);
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.statCard {
+  background: var(--color-card-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.statIcon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+}
+
+.statInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  font-family: var(--font-mono);
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--color-primary-light);
+  margin-bottom: 1.5rem;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--color-primary);
+}
+
+.tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* Tab Content */
+.tabContent {
+  background: var(--color-card-light);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+/* Overview Tab */
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.infoCard {
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+.infoCard h3 {
+  font-size: 1rem;
+  color: var(--color-primary-dark);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-primary-light);
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--color-primary-light);
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.infoValue {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Loyalty Tab */
+.loyaltySection h3 {
+  font-size: 1.1rem;
+  color: var(--color-primary-dark);
+  margin: 1.5rem 0 1rem;
+}
+
+.loyaltySummary {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.pointsBalance {
+  text-align: center;
+  padding-right: 2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.pointsValue {
+  display: block;
+  font-size: 3rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.pointsLabel {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.loyaltyInfo p {
+  margin: 0.25rem 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.historyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+}
+
+.historyDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.historyType {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.historyDesc {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.historyDate {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.historyPoints {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+}
+
+.historyPoints.positive {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--color-success);
+}
+
+.historyPoints.negative {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--color-error);
+}
+
+/* Transactions Tab */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-primary-light);
+}
+
+.table th {
+  background: var(--color-bg-light);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-primary-dark);
+}
+
+.table tbody tr:hover {
+  background: rgba(181, 126, 220, 0.05);
+}
+
+.txnLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-family: var(--font-mono);
+}
+
+.txnLink:hover {
+  text-decoration: underline;
+}
+
+.paymentMethod {
+  text-transform: capitalize;
+}
+
+.amount {
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.pointsEarned {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .loyaltySummary {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pointsBalance {
+    padding-right: 0;
+    padding-bottom: 1rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .tabs {
+    overflow-x: auto;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+}

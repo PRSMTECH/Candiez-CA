@@ -106,7 +106,40 @@ function TransactionDetail() {
         const response = await axios.get(`/api/transactions/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setTransaction(response.data.transaction || response.data);
+        // Transform API response to match expected format
+        const txn = response.data.transaction || response.data;
+        const items = response.data.items || [];
+
+        // Build transformed transaction object
+        const transformedTxn = {
+          ...txn,
+          id: txn.transaction_id || txn.id,
+          date: txn.created_at || txn.date,
+          customer: txn.customer_name ? {
+            name: txn.customer_name,
+            email: txn.customer_email || 'N/A',
+            phone: txn.customer_phone || 'N/A'
+          } : { name: 'Walk-in Customer', email: 'N/A', phone: 'N/A' },
+          employee: { name: txn.user_name || 'Unknown' },
+          register: 'Register 1',
+          paymentMethod: txn.payment_method || 'cash',
+          status: txn.voided ? 'voided' : 'completed',
+          subtotal: txn.subtotal || 0,
+          tax: txn.tax || 0,
+          taxRate: 7.75,
+          discount: txn.discount_amount || 0,
+          discountType: txn.discount_type || null,
+          total: txn.total || 0,
+          items: items.map(item => ({
+            id: item.id,
+            name: item.product_name || item.name,
+            quantity: item.quantity,
+            unitPrice: item.unit_price || item.price,
+            total: item.total || (item.quantity * (item.unit_price || item.price))
+          })),
+          notes: txn.notes || ''
+        };
+        setTransaction(transformedTxn);
       } catch {
         // Use mock data for development
         const txn = mockTransactions[id];

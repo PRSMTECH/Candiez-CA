@@ -13,6 +13,23 @@
       <routing>React Router v6</routing>
       <icons>Lucide React</icons>
       <charts>Recharts</charts>
+      <mobile_ui>
+        <library>Ant Design Mobile (antd-mobile)</library>
+        <version>5.x</version>
+        <purpose>Mobile-first UI components for touch devices</purpose>
+        <key_components>
+          - Button, Form, Input (touch-optimized)
+          - NavBar, TabBar, SideBar (mobile navigation)
+          - ActionSheet, Dialog, Toast (feedback)
+          - PullToRefresh, InfiniteScroll (mobile UX)
+          - SwipeAction, FloatingBubble (gestures)
+          - Picker, DatePicker, Cascader (mobile inputs)
+          - List, Card, Grid (mobile layouts)
+          - SearchBar, NumberKeyboard (POS-specific)
+        </key_components>
+        <install>npm install antd-mobile</install>
+        <docs>https://mobile.ant.design</docs>
+      </mobile_ui>
     </frontend>
     <backend>
       <runtime>Node.js with Express</runtime>
@@ -275,6 +292,71 @@
       - Empty states with illustrations
       - Error states with recovery options
     </ui_and_experience>
+
+    <mobile_design_requirements>
+      <overview>Mobile-first design using Ant Design Mobile for optimal touch experience on tablets and phones used in dispensary floor operations.</overview>
+
+      <mobile_navigation>
+        - Bottom TabBar for primary navigation (POS, Customers, Products, More)
+        - NavBar with back button for drill-down pages
+        - SideBar drawer for settings and admin menu
+        - Floating action button for quick actions
+        - Swipe gestures for navigation between pages
+      </mobile_navigation>
+
+      <mobile_pos_interface>
+        - Full-screen product grid with large touch targets (minimum 44px)
+        - NumberKeyboard for quantity and price input
+        - SwipeAction on cart items to remove/edit
+        - ActionSheet for payment method selection
+        - Pull-to-refresh for product updates
+        - Sticky cart summary at bottom
+        - Barcode scanner integration via camera
+      </mobile_pos_interface>
+
+      <mobile_customer_management>
+        - SearchBar with voice input support
+        - List with swipe actions (call, message, edit)
+        - FloatingBubble for quick-add customer
+        - Picker for customer segmentation filters
+        - InfiniteScroll for customer list
+        - Card-based customer profiles
+      </mobile_customer_management>
+
+      <mobile_inventory>
+        - Grid view for products with image thumbnails
+        - SwipeAction for quick stock adjustments
+        - Badge indicators for low stock/out of stock
+        - Stepper component for quantity adjustments
+        - Camera integration for barcode scanning
+        - Pull-to-refresh for inventory sync
+      </mobile_inventory>
+
+      <mobile_ux_patterns>
+        - Toast notifications for success/error feedback
+        - Dialog for confirmations (void, refund, delete)
+        - ActionSheet for contextual actions
+        - Skeleton loading states
+        - Empty state illustrations
+        - Haptic feedback for key actions
+        - Offline support with sync indicator
+      </mobile_ux_patterns>
+
+      <responsive_breakpoints>
+        - Mobile: < 640px (phone - primary budtender device)
+        - Tablet: 640px - 1024px (iPad - POS station)
+        - Desktop: > 1024px (admin/manager workstation)
+      </responsive_breakpoints>
+
+      <touch_optimization>
+        - Minimum tap target: 44px x 44px
+        - Adequate spacing between interactive elements
+        - No hover-dependent interactions
+        - Swipe gestures for common actions
+        - Pull-to-refresh on all list views
+        - Large, easy-to-read fonts
+      </touch_optimization>
+    </mobile_design_requirements>
   </core_features>
 
   <database_schema>

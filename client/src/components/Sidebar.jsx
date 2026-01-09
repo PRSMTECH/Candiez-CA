@@ -5,6 +5,7 @@ import {
   ShoppingCart,
   Users,
   Package,
+  FolderTree,
   Warehouse,
   Receipt,
   BarChart3,
@@ -46,6 +47,12 @@ function Sidebar({ collapsed, onToggle }) {
       icon: Package,
       label: 'Products',
       roles: ['admin', 'manager', 'budtender']
+    },
+    {
+      path: '/categories',
+      icon: FolderTree,
+      label: 'Categories',
+      roles: ['admin', 'manager']
     },
     {
       path: '/inventory',

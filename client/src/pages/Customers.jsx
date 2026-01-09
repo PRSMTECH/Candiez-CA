@@ -92,6 +92,7 @@ function Customers() {
     phone: customer.phone || '',
     dateOfBirth: customer.date_of_birth,
     loyaltyPoints: customer.loyalty_points || 0,
+    loyaltyTier: customer.loyalty_tier || 'bronze',
     totalPurchases: customer.total_spent || 0,
     createdAt: customer.created_at,
     status: customer.status || 'active'
@@ -263,9 +264,14 @@ function Customers() {
                     </span>
                   </td>
                   <td>
-                    <span className={styles.loyaltyPoints}>
-                      {customer.loyaltyPoints} pts
-                    </span>
+                    <div className={styles.loyaltyInfo}>
+                      <span className={styles.loyaltyPoints}>
+                        {customer.loyaltyPoints} pts
+                      </span>
+                      <span className={`${styles.loyaltyTier} ${styles[`tier${customer.loyaltyTier?.charAt(0).toUpperCase() + customer.loyaltyTier?.slice(1)}`] || ''}`}>
+                        {customer.loyaltyTier || 'bronze'}
+                      </span>
+                    </div>
                   </td>
                   <td className={styles.purchases}>
                     {formatCurrency(customer.totalPurchases)}
