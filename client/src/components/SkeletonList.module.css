@@ -1,0 +1,14 @@
+/* SkeletonList - Skeleton list container styles */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Only show on mobile */
+@media (min-width: 640px) {
+  .list {
+    display: none;
+  }
+}

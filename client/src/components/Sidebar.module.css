@@ -191,6 +191,37 @@
   color: white;
 }
 
+/* User Actions Container */
+.userActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Theme Toggle Button */
+.themeToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-light);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  justify-content: center;
+}
+
+.themeToggle:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 /* Collapsed state adjustments */
 .sidebar.collapsed .menuLink {
   justify-content: center;
@@ -213,7 +244,7 @@
   padding: 0.75rem;
 }
 
-/* Responsive */
+/* Responsive - Tablet */
 @media (max-width: 768px) {
   .sidebar {
     width: 72px;
@@ -227,4 +258,67 @@
   .toggleBtn {
     display: none;
   }
+
+  .menuLink {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  .logoutBtn {
+    min-height: 44px;
+  }
+}
+
+/* Responsive - Mobile (<640px) - Hide sidebar, use TabBar */
+@media (max-width: 639px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .sidebar {
+  background: linear-gradient(
+    180deg,
+    var(--color-card-dark) 0%,
+    #1F1F38 100%
+  );
+  border-right-color: var(--color-border);
+}
+
+[data-theme="dark"] .logoSection {
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme="dark"] .toggleBtn {
+  border-color: var(--color-card-dark);
+}
+
+[data-theme="dark"] .menuLink:hover {
+  background: rgba(181, 126, 220, 0.15);
+}
+
+[data-theme="dark"] .divider::after {
+  background: var(--color-border);
+}
+
+[data-theme="dark"] .userSection {
+  border-top-color: var(--color-border);
+  background: rgba(181, 126, 220, 0.08);
+}
+
+[data-theme="dark"] .userName {
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .themeToggle {
+  background: var(--color-card-dark);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .themeToggle:hover {
+  background: rgba(181, 126, 220, 0.2);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }

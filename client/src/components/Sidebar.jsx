@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -13,12 +14,15 @@ import {
   UserCog,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sun,
+  Moon
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 function Sidebar({ collapsed, onToggle }) {
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   // Role-based access control for menu items
   const isAdmin = user?.role === 'admin';
@@ -178,14 +182,24 @@ function Sidebar({ collapsed, onToggle }) {
             <span className={styles.userRole}>{user?.role || 'staff'}</span>
           </div>
         )}
-        <button
-          className={styles.logoutBtn}
-          onClick={handleLogout}
-          title="Logout"
-        >
-          <LogOut size={20} />
-          {!collapsed && <span>Logout</span>}
-        </button>
+        <div className={styles.userActions}>
+          <button
+            className={styles.themeToggle}
+            onClick={toggleTheme}
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            {!collapsed && <span>{isDark ? 'Light' : 'Dark'}</span>}
+          </button>
+          <button
+            className={styles.logoutBtn}
+            onClick={handleLogout}
+            title="Logout"
+          >
+            <LogOut size={20} />
+            {!collapsed && <span>Logout</span>}
+          </button>
+        </div>
       </div>
     </aside>
   );

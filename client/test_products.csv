@@ -1,0 +1,29 @@
+ID,Name,Category,Strain,THC %,CBD %,Price,Unit Price,Unit,Stock,Status
+101,"Purple Haze Premium","Flower","Sativa",22.5,0.1,55.00,18.33,gram,100,active
+102,"Northern Lights Classic","Flower","Indica",20.0,0.2,48.00,16.00,gram,85,active
+103,"Girl Scout Cookies","Flower","Hybrid",25.0,0.1,52.00,17.33,gram,75,active
+104,"Granddaddy Purple","Flower","Indica",19.5,0.3,45.00,15.00,gram,120,active
+105,"Jack Herer Supreme","Flower","Sativa",23.0,0.1,58.00,19.33,gram,90,active
+106,"White Widow Gold","Flower","Hybrid",21.0,0.2,50.00,16.67,gram,65,active
+107,"Durban Poison","Flower","Sativa",24.0,0.1,55.00,18.33,gram,80,active
+108,"Gorilla Glue #4","Flower","Hybrid",28.0,0.1,62.00,20.67,gram,45,active
+109,"Pineapple Express","Flower","Hybrid",20.5,0.2,48.00,16.00,gram,110,active
+110,"Strawberry Cough","Flower","Sativa",21.5,0.1,52.00,17.33,gram,95,active
+111,"Blueberry Kush","Flower","Indica",18.0,0.5,42.00,14.00,gram,130,active
+112,"Tangie Dream","Flower","Sativa",22.0,0.1,50.00,16.67,gram,70,active
+113,"Wedding Cake","Flower","Hybrid",26.0,0.1,60.00,20.00,gram,55,active
+114,"Gelato #41","Flower","Hybrid",24.5,0.1,58.00,19.33,gram,60,active
+115,"Amnesia Haze","Flower","Sativa",22.5,0.1,54.00,18.00,gram,85,active
+116,"Grape Ape","Flower","Indica",21.0,0.2,48.00,16.00,gram,75,active
+117,"Lemon Haze","Flower","Sativa",20.0,0.1,46.00,15.33,gram,100,active
+118,"OG Indica Cart","Vape","Indica",85.0,0.5,55.00,55.00,cartridge,40,active
+119,"Sativa Live Resin","Concentrates","Sativa",78.0,0.3,65.00,65.00,gram,35,active
+120,"CBD Calm Gummies 20pk","Edibles","N/A",0.3,25.0,38.00,1.90,piece,50,active
+121,"THC Brownie 100mg","Edibles","Hybrid",10.0,0.0,25.00,25.00,piece,45,active
+122,"Pre-Roll 3 Pack Indica","Pre-Rolls","Indica",18.0,0.2,30.00,10.00,joint,60,active
+123,"Pre-Roll 3 Pack Sativa","Pre-Rolls","Sativa",19.0,0.1,32.00,10.67,joint,55,active
+124,"Pain Relief Topical","Topicals","N/A",2.0,15.0,45.00,45.00,bottle,30,active
+125,"Infused Massage Oil","Topicals","N/A",3.0,8.0,38.00,38.00,bottle,25,active
+126,"Rolling Papers Premium","Accessories","N/A",0.0,0.0,8.00,8.00,pack,200,active
+127,"Glass Pipe Deluxe","Accessories","N/A",0.0,0.0,35.00,35.00,piece,15,active
+128,"Grinder 4-Part Metal","Accessories","N/A",0.0,0.0,28.00,28.00,piece,20,active

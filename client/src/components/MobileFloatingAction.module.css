@@ -1,0 +1,68 @@
+/* MobileFloatingAction - Floating action button styles */
+
+.floatingWrapper {
+  /* Only show on mobile */
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .floatingWrapper {
+    display: block;
+  }
+}
+
+.floatingBubble {
+  /* Candiez purple gradient is set via inline style */
+  box-shadow: 0 4px 12px rgba(181, 126, 220, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floatingBubble:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(181, 126, 220, 0.3);
+}
+
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.bubbleContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: white;
+}
+
+.icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Animation for attention */
+@keyframes pulse-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.floatingBubble:not(.disabled) {
+  animation: pulse-float 3s ease-in-out infinite;
+}
+
+/* Ensure FAB doesn't overlap with TabBar */
+/* TabBar is typically 50px + safe area, FAB positioned at 80px from bottom */

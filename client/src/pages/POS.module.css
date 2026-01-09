@@ -669,3 +669,213 @@
     max-height: 500px;
   }
 }
+
+/* Mobile Touch Targets - 44px minimum */
+@media (max-width: 768px) {
+  .qtyBtn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
+
+  .removeBtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.5rem;
+  }
+
+  .clearCart {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  .paymentBtn {
+    min-height: 44px;
+  }
+
+  .checkoutBtn {
+    min-height: 48px;
+  }
+
+  .redeemBtn,
+  .redeemMaxBtn,
+  .redeemCancelBtn {
+    min-height: 44px;
+  }
+
+  .receiptBtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .productCard {
+    min-height: 44px;
+  }
+}
+
+/* Hide desktop grid on mobile, show mobile grid */
+@media (max-width: 639px) {
+  .productsGrid {
+    display: none;
+  }
+}
+
+/* Desktop/Mobile visibility helpers */
+.desktopOnly {
+  display: block;
+}
+
+.mobileOnly {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .desktopOnly {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: block;
+  }
+}
+
+/* Mobile Payment Selector */
+.mobilePaymentSelector {
+  margin-bottom: 1rem;
+}
+
+.paymentSelectorBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #F8F0FC 0%, #E8D5F2 100%);
+  border: 2px solid #B57EDC;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  min-height: 52px;
+  transition: all 0.2s;
+}
+
+.paymentSelectorBtn:active {
+  transform: scale(0.98);
+  background: #E8D5F2;
+}
+
+.paymentIcon {
+  font-size: 24px;
+}
+
+.paymentLabel {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  text-align: left;
+}
+
+.paymentArrow {
+  font-size: 12px;
+  color: var(--color-primary);
+  transition: transform 0.2s;
+}
+
+/* Shift Prompt Styles */
+.shiftPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem;
+  background: var(--color-card-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  grid-column: 1 / -1;
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
+.shiftPromptIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.shiftPromptTitle {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.shiftPromptText {
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.startShiftBtn {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1rem;
+}
+
+.startShiftBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.backBtn {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: var(--color-bg-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Shift Info in Header */
+.shiftInfo {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--color-success-light, rgba(76, 175, 80, 0.1));
+  border-radius: var(--radius-full, 9999px);
+  font-size: 0.8rem;
+  color: var(--color-success);
+}
+
+/* Dark Mode Shift Styles */
+[data-theme="dark"] .shiftPrompt {
+  background: var(--color-card-dark);
+}
+
+[data-theme="dark"] .shiftPromptTitle {
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .backBtn {
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .backBtn:hover {
+  background: var(--color-card-dark);
+}

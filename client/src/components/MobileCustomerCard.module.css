@@ -1,0 +1,225 @@
+/* MobileCustomerCard - Card-based customer profile for mobile */
+
+.swipeContainer {
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  min-height: 88px; /* Ensure touch target height */
+}
+
+.card:active {
+  background: var(--color-bg-light, #f8f9fa);
+}
+
+/* Avatar with initials */
+.avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #B57EDC 0%, #7B4A9E 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(181, 126, 220, 0.3);
+}
+
+.initials {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+}
+
+/* Customer info section */
+.info {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text-primary, #1a1a1a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusTag {
+  font-size: 0.625rem !important;
+  padding: 0.125rem 0.375rem !important;
+  border-radius: var(--radius-full) !important;
+  text-transform: capitalize;
+}
+
+.contactRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.phone {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary, #666);
+  font-family: var(--font-mono, 'SF Mono', monospace);
+}
+
+.email {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.loyaltyBadge {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: white;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-full);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.points {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary, #B57EDC);
+  font-family: var(--font-mono, 'SF Mono', monospace);
+}
+
+.totalSpent {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #666);
+}
+
+/* Quick action buttons */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.actionButton {
+  width: 40px;
+  height: 40px;
+  min-width: 44px; /* Touch target */
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-light, #f8f9fa);
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:active {
+  background: var(--color-primary-light, #F8F0FC);
+  border-color: var(--color-primary, #B57EDC);
+  transform: scale(0.95);
+}
+
+.actionIcon {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 359px) {
+  .card {
+    padding: 0.75rem;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .initials {
+    font-size: 0.875rem;
+  }
+
+  .name {
+    font-size: 0.875rem;
+  }
+
+  .email {
+    max-width: 140px;
+  }
+
+  .actions {
+    flex-direction: row;
+  }
+}
+
+/* Tablet/larger mobile */
+@media (min-width: 480px) {
+  .card {
+    gap: 1rem;
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .initials {
+    font-size: 1.25rem;
+  }
+
+  .email {
+    max-width: 220px;
+  }
+
+  .actions {
+    flex-direction: row;
+  }
+}
+
+/* Only show on mobile */
+@media (min-width: 640px) {
+  .swipeContainer {
+    display: none;
+  }
+}

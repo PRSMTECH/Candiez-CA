@@ -1,0 +1,298 @@
+/* Settings Page Styles */
+
+.container {
+  padding: 2rem;
+  background: var(--color-bg-light);
+  min-height: 100%;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--color-text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+}
+
+.card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: 1rem 1.5rem;
+  background: var(--color-bg-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.cardHeader h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardContent {
+  padding: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.required {
+  color: var(--color-error);
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.inputError {
+  border-color: var(--color-error);
+}
+
+.inputError:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+}
+
+.inputSuccess {
+  border-color: var(--color-success);
+}
+
+.inputSuccess:focus {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passwordToggle:hover {
+  color: var(--color-primary);
+}
+
+.complexityList {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+}
+
+.complexityItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.complexityItem.valid {
+  color: var(--color-success);
+}
+
+.complexityItem.invalid {
+  color: var(--color-text-secondary);
+}
+
+.complexityIcon {
+  font-size: 0.875rem;
+}
+
+.errorText {
+  font-size: 0.75rem;
+  color: var(--color-error);
+  margin-top: 0.5rem;
+}
+
+.successMessage {
+  background: var(--color-success-light);
+  color: var(--color-success);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  border-left: 3px solid var(--color-success);
+}
+
+.errorMessage {
+  background: var(--color-error-light);
+  color: var(--color-error);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  border-left: 3px solid var(--color-error);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.infoCard {
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.infoCard p {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.infoCard strong {
+  color: var(--color-primary);
+}
+
+.userNote {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-light);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .container {
+  background: var(--color-bg-dark);
+}
+
+[data-theme="dark"] .card {
+  background: var(--color-card-dark);
+}
+
+[data-theme="dark"] .cardHeader {
+  background: #1F1F38;
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme="dark"] .cardHeader h2 {
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .input {
+  background: var(--color-input-bg);
+  border-color: var(--color-border);
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .input:focus {
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .infoCard {
+  background: rgba(181, 126, 220, 0.15);
+}
+
+[data-theme="dark"] .infoCard p {
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .userNote {
+  border-top-color: var(--color-border);
+}

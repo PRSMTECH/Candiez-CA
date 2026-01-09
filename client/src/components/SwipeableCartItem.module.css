@@ -1,0 +1,149 @@
+/* SwipeableCartItem Styles */
+
+.swipeContainer {
+  margin-bottom: 8px;
+}
+
+.swipeContainer :global(.adm-swipe-action-track) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cartItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.itemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-weight: 600;
+  font-size: 14px;
+  color: #2D2D2D;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemPrice {
+  font-size: 13px;
+  color: #6B6B6B;
+  font-family: 'SF Mono', 'Monaco', monospace;
+}
+
+.itemTotal {
+  font-size: 16px;
+  font-weight: 700;
+  color: #7B4A9E;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  padding-left: 12px;
+}
+
+/* Swipe action button styling */
+.swipeContainer :global(.adm-swipe-action-actions-left),
+.swipeContainer :global(.adm-swipe-action-actions-right) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.swipeContainer :global(.adm-button) {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 20px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Quantity edit overlay */
+.quantityEditOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.quantityEditModal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 320px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.editHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #B57EDC 0%, #7B4A9E 100%);
+  color: white;
+}
+
+.editHeader span {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.editHeader button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.editContent {
+  padding: 20px;
+}
+
+.productName {
+  font-weight: 600;
+  font-size: 14px;
+  color: #2D2D2D;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Swipe hint indicator */
+.swipeContainer::before {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, #E8D5F2 0%, #B57EDC 100%);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.swipeContainer:first-child::before {
+  opacity: 0.5;
+}

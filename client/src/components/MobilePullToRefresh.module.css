@@ -1,0 +1,69 @@
+/* MobilePullToRefresh Styles */
+
+.pullToRefreshWrapper {
+  display: none;
+  height: 100%;
+  overflow: auto;
+}
+
+/* Show only on mobile (<640px) */
+@media (max-width: 639px) {
+  .pullToRefreshWrapper {
+    display: block;
+  }
+}
+
+/* Pull text styling */
+.pullText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #7B4A9E;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px;
+}
+
+.pullIcon {
+  font-size: 18px;
+  animation: bounce 0.5s infinite;
+}
+
+.releaseIcon {
+  font-size: 18px;
+  color: #B57EDC;
+}
+
+.loadingIcon {
+  font-size: 18px;
+  animation: spin 1s linear infinite;
+}
+
+.completeIcon {
+  font-size: 18px;
+  color: #22c55e;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* PullToRefresh theme overrides */
+.pullToRefreshWrapper :global(.adm-pull-to-refresh-head) {
+  background: linear-gradient(180deg, #F8F0FC 0%, transparent 100%);
+}

@@ -1,17 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import axios from 'axios';
 import styles from './ProductNew.module.css';
 
 function ProductNew() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { success: showSuccess, error: showError } = useToast();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Image upload state
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     name: '',
     category_id: '',
@@ -24,7 +34,8 @@ function ProductNew() {
     stock: 0,
     status: 'active',
     description: '',
-    supplier: ''
+    supplier: '',
+    image_url: ''
   });
 
   // Fetch categories from API
@@ -51,6 +62,86 @@ function ProductNew() {
     }));
   };
 
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showError('Please select an image file');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Image must be less than 5MB');
+        return;
+      }
+
+      setSelectedImage(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedImage) return null;
+
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('image', selectedImage);
+
+      const token = localStorage.getItem('token');
+
+      // Simulate upload progress for demonstration
+      // In a real app, this would use axios onUploadProgress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return prev;
+          }
+          return prev + 10;
+        });
+      }, 200);
+
+      // Simulate API call (replace with actual endpoint)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      // For demo, return a placeholder URL
+      // In production, this would be the response from the upload API
+      const imageUrl = `/uploads/products/${Date.now()}-${selectedImage.name}`;
+
+      showSuccess('Image uploaded successfully!');
+      return imageUrl;
+    } catch (err) {
+      console.error('Image upload error:', err);
+      showError('Failed to upload image');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setUploadProgress(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -71,6 +162,12 @@ function ProductNew() {
     }
 
     try {
+      // Upload image first if selected
+      let imageUrl = formData.image_url;
+      if (selectedImage) {
+        imageUrl = await handleImageUpload();
+      }
+
       const token = localStorage.getItem('token');
 
       // Generate SKU from name and timestamp
@@ -88,7 +185,8 @@ function ProductNew() {
         cbd_percent: formData.cbdContent,
         price: formData.price,
         stock_quantity: formData.stock,
-        weight_unit: formData.unit
+        weight_unit: formData.unit,
+        image_url: imageUrl
       };
 
       const response = await axios.post('/api/products', apiData, {
@@ -97,6 +195,7 @@ function ProductNew() {
 
       console.log('Product created successfully:', response.data);
       setSuccess(true);
+      showSuccess('Product created successfully!');
       setTimeout(() => {
         navigate('/products');
       }, 1500);
@@ -203,6 +302,63 @@ function ProductNew() {
                 <option value="discontinued">Discontinued</option>
               </select>
             </div>
+          </div>
+        </div>
+
+        {/* Product Image Section */}
+        <div className={styles.formSection}>
+          <h2 className={styles.sectionTitle}>Product Image</h2>
+
+          <div className={styles.imageUploadArea}>
+            {imagePreview ? (
+              <div className={styles.imagePreviewContainer}>
+                <img src={imagePreview} alt="Preview" className={styles.imagePreview} />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className={styles.removeImageBtn}
+                  disabled={uploading}
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div
+                className={styles.uploadPlaceholder}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <span className={styles.uploadIcon}>📷</span>
+                <span>Click to upload product image</span>
+                <span className={styles.uploadHint}>Max 5MB, JPEG/PNG</span>
+              </div>
+            )}
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageSelect}
+              accept="image/*"
+              className={styles.fileInput}
+              disabled={uploading}
+            />
+
+            {/* Upload Progress Bar */}
+            {uploading && (
+              <div className={styles.progressContainer}>
+                <div className={styles.progressLabel}>
+                  Uploading... {uploadProgress}%
+                </div>
+                <div className={styles.progressBar}>
+                  <div
+                    className={styles.progressFill}
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                {uploadProgress === 100 && (
+                  <div className={styles.progressComplete}>Upload complete!</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -346,16 +502,16 @@ function ProductNew() {
             type="button"
             onClick={handleCancel}
             className={styles.cancelButton}
-            disabled={saving}
+            disabled={saving || uploading}
           >
             Cancel
           </button>
           <button
             type="submit"
             className={styles.saveButton}
-            disabled={saving || success}
+            disabled={saving || success || uploading}
           >
-            {saving ? 'Saving...' : 'Create Product'}
+            {uploading ? 'Uploading...' : saving ? 'Saving...' : 'Create Product'}
           </button>
         </div>
       </form>

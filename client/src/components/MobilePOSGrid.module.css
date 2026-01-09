@@ -1,0 +1,154 @@
+/* MobilePOSGrid Styles - Touch-optimized product grid */
+
+.mobileGridWrapper {
+  display: none;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Show only on mobile (<640px) */
+@media (max-width: 639px) {
+  .mobileGridWrapper {
+    display: block;
+  }
+}
+
+/* 4 columns on tablet (640-767px) */
+@media (min-width: 640px) and (max-width: 767px) {
+  .mobileGridWrapper {
+    display: block;
+  }
+
+  .mobileGridWrapper :global(.adm-grid) {
+    --columns: 4;
+  }
+}
+
+.productCard {
+  background: white;
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 110px; /* Well above 44px minimum */
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Touch-friendly active state */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.productCard:active {
+  transform: scale(0.95);
+  border-color: #B57EDC;
+  background: #F8F0FC;
+}
+
+.productCard.outOfStock {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.productCard.outOfStock:active {
+  transform: none;
+  border-color: transparent;
+  background: white;
+}
+
+.productEmoji {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.productName {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2D2D2D;
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-height: 26px;
+  width: 100%;
+}
+
+.strainBadge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 100px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.strainBadge.indica {
+  background: #7c3aed;
+  color: white;
+}
+
+.strainBadge.sativa {
+  background: #16a34a;
+  color: white;
+}
+
+.strainBadge.hybrid {
+  background: #f59e0b;
+  color: white;
+}
+
+.strainBadge.cbd {
+  background: #06b6d4;
+  color: white;
+}
+
+.productPrice {
+  font-size: 13px;
+  font-weight: 700;
+  color: #7B4A9E;
+  font-family: 'SF Mono', 'Monaco', monospace;
+  margin-top: auto;
+}
+
+.stockBadge {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: #E8D5F2;
+  color: #7B4A9E;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.stockBadge.lowStock {
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.stockBadge.outOfStockBadge {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #6B6B6B;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  opacity: 0.5;
+  margin-bottom: 16px;
+}

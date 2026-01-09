@@ -655,7 +655,7 @@ app.delete('/api/products/:id', authenticate, authorize('admin'), (req, res) => 
     }
 
     // Soft delete by setting is_active to 0
-    db.prepare("UPDATE products SET is_active = 0, updated_at = datetime('now') WHERE id = ?")
+    db.prepare("UPDATE products SET is_active = 0 WHERE id = ?")
       .run(req.params.id);
 
     res.json({ message: 'Product deleted successfully' });
@@ -755,7 +755,7 @@ app.delete('/api/categories/:id', authenticate, authorize('admin'), (req, res) =
     }
 
     // Soft delete by setting is_active to 0
-    db.prepare("UPDATE categories SET is_active = 0, updated_at = datetime('now') WHERE id = ?").run(req.params.id);
+    db.prepare("UPDATE categories SET is_active = 0 WHERE id = ?").run(req.params.id);
     res.json({ message: 'Category deleted successfully' });
   } catch (error) {
     console.error('Delete category error:', error);

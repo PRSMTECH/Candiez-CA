@@ -1,0 +1,142 @@
+/* SkeletonCard - Skeleton loading state styles */
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0.5rem;
+  min-height: 88px;
+}
+
+/* Avatar skeleton */
+.avatar {
+  flex-shrink: 0;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+}
+
+/* Product image skeleton */
+.productImage {
+  flex-shrink: 0;
+  width: 80px !important;
+  height: 80px !important;
+  border-radius: var(--radius-md) !important;
+}
+
+/* Customer/Product info section */
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.name {
+  width: 60% !important;
+  height: 18px !important;
+}
+
+.title {
+  width: 80% !important;
+  height: 16px !important;
+}
+
+.statusBadge {
+  width: 50px !important;
+  height: 16px !important;
+  border-radius: var(--radius-full) !important;
+}
+
+.contact {
+  width: 100% !important;
+}
+
+.details {
+  width: 100% !important;
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+}
+
+.loyaltyBadge {
+  width: 50px !important;
+  height: 14px !important;
+  border-radius: var(--radius-full) !important;
+}
+
+.points {
+  width: 40px !important;
+  height: 14px !important;
+}
+
+.spent {
+  width: 60px !important;
+  height: 14px !important;
+}
+
+.price {
+  width: 60px !important;
+  height: 18px !important;
+}
+
+.badge {
+  width: 60px !important;
+  height: 20px !important;
+  border-radius: var(--radius-full) !important;
+}
+
+/* Action buttons skeleton */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.actionButton {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: var(--radius-md) !important;
+}
+
+/* Only show on mobile */
+@media (min-width: 640px) {
+  .card {
+    display: none;
+  }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 359px) {
+  .card {
+    padding: 0.75rem;
+  }
+
+  .avatar {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}

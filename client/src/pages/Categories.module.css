@@ -319,3 +319,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Mobile Touch Targets - 44px minimum */
+@media (max-width: 768px) {
+  .addButton {
+    min-height: 44px;
+  }
+
+  .editButton,
+  .deleteButton {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .searchInput {
+    min-height: 44px;
+  }
+}

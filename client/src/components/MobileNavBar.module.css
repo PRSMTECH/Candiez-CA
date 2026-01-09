@@ -1,0 +1,43 @@
+/* Mobile NavBar Styles */
+
+.mobileNavBar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Show only on mobile (<640px) */
+@media (max-width: 639px) {
+  .mobileNavBar {
+    display: block;
+  }
+}
+
+/* NavBar styling with Candiez purple gradient */
+.navBar {
+  --adm-color-primary: #B57EDC;
+  background: linear-gradient(135deg, #B57EDC 0%, #7B4A9E 100%);
+  color: #fff;
+  height: 48px;
+}
+
+.navBar :global(.adm-nav-bar-title) {
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.navBar :global(.adm-nav-bar-back-arrow) {
+  color: #fff;
+}
+
+.navBar :global(.adm-nav-bar-left) {
+  color: #fff;
+}
+
+.navBar :global(.adm-nav-bar-right) {
+  color: #fff;
+}

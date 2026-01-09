@@ -1,0 +1,52 @@
+/* Mobile TabBar Styles */
+
+.mobileTabBar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Show only on mobile (<640px) */
+@media (max-width: 639px) {
+  .mobileTabBar {
+    display: block;
+  }
+}
+
+/* TabBar styling with Candiez purple */
+.tabBar {
+  --adm-color-primary: #B57EDC;
+}
+
+.tabBar :global(.adm-tab-bar-item-active) {
+  color: #B57EDC;
+}
+
+.tabBar :global(.adm-tab-bar-item-icon) {
+  font-size: 24px;
+}
+
+.tabBar :global(.adm-tab-bar-item-title) {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .mobileTabBar {
+  background: var(--color-card-dark);
+  border-top-color: var(--color-border);
+}
+
+[data-theme="dark"] .tabBar :global(.adm-tab-bar-item) {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .tabBar :global(.adm-tab-bar-item-active) {
+  color: #B57EDC;
+}

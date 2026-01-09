@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
+import { confirmDelete } from '../utils/mobileConfirm';
 import axios from 'axios';
 import styles from './Categories.module.css';
 
 function Categories() {
   const { user } = useAuth();
+  const { success, error: showError } = useToast();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -123,6 +126,7 @@ function Categories() {
       }
       await fetchCategories();
       closeModal();
+      success(modalMode === 'add' ? 'Category created!' : 'Category updated!');
     } catch (err) {
       console.error('Save category error:', err);
       setError(err.response?.data?.error || 'Failed to save category');
@@ -133,16 +137,18 @@ function Categories() {
 
   // Delete category
   const handleDelete = async (category) => {
-    if (!confirm(`Are you sure you want to delete "${category.name}"? This action cannot be undone.`)) {
+    const confirmed = await confirmDelete(category.name);
+    if (!confirmed) {
       return;
     }
 
     try {
       await axios.delete(`/api/categories/${category.id}`);
       await fetchCategories();
+      success('Category deleted!');
     } catch (err) {
       console.error('Delete category error:', err);
-      alert(err.response?.data?.error || 'Failed to delete category');
+      showError(err.response?.data?.error || 'Failed to delete category');
     }
   };
 

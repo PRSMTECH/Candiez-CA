@@ -322,3 +322,46 @@
     padding: 1.5rem;
   }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .loginCard {
+  background: var(--color-card-dark);
+}
+
+[data-theme="dark"] .form {
+  background: var(--color-card-dark);
+}
+
+[data-theme="dark"] .formTitle {
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .label {
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .input {
+  background: var(--color-input-bg);
+  border-color: var(--color-border);
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .input:focus {
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .input:disabled {
+  background: #1F1F38;
+}
+
+[data-theme="dark"] .input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .footer {
+  border-top-color: var(--color-border);
+}
+
+[data-theme="dark"] :global(.loading-container) {
+  background: var(--color-bg-dark);
+}

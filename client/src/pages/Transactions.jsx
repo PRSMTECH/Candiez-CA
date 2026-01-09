@@ -1,18 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
+import MobilePullToRefresh from '../components/MobilePullToRefresh';
 import axios from 'axios';
 import styles from './Transactions.module.css';
 
 function Transactions() {
   const { user } = useAuth();
+  const { warning, error: showError, success } = useToast();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' = oldest first, 'desc' = newest first
   const [voidModalOpen, setVoidModalOpen] = useState(false);
   const [transactionToVoid, setTransactionToVoid] = useState(null);
   const [voidReason, setVoidReason] = useState('');
@@ -30,8 +34,8 @@ function Transactions() {
     fetchTransactions();
   }, []);
 
-  const fetchTransactions = async () => {
-    setLoading(true);
+  const fetchTransactions = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const response = await axios.get('/api/transactions');
       setTransactions(response.data.transactions || []);
@@ -39,9 +43,14 @@ function Transactions() {
       console.error('Failed to fetch transactions:', error);
       setTransactions([]);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
-  };
+  }, []);
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    await fetchTransactions(false);
+  }, [fetchTransactions]);
 
   const handleView = (transactionId) => {
     navigate(`/transactions/${transactionId}`);
@@ -74,9 +83,10 @@ function Transactions() {
       setVoidModalOpen(false);
       setTransactionToVoid(null);
       setVoidReason('');
+      success('Transaction voided successfully');
     } catch (error) {
       console.error('Failed to void transaction:', error);
-      alert(error.response?.data?.error || 'Failed to void transaction');
+      showError(error.response?.data?.error || 'Failed to void transaction');
     } finally {
       setVoidLoading(false);
     }
@@ -108,7 +118,7 @@ function Transactions() {
       })));
     } catch (error) {
       console.error('Failed to fetch transaction items:', error);
-      alert('Failed to load transaction items');
+      showError('Failed to load transaction items');
     } finally {
       setLoadingItems(false);
     }
@@ -139,7 +149,7 @@ function Transactions() {
 
     const selectedItems = refundItems.filter(item => item.selected);
     if (selectedItems.length === 0) {
-      alert('Please select at least one item to refund');
+      warning('Please select at least one item to refund');
       return;
     }
 
@@ -172,9 +182,10 @@ function Transactions() {
       setTransactionToRefund(null);
       setRefundItems([]);
       setRefundReason('');
+      success('Refund processed successfully');
     } catch (error) {
       console.error('Failed to process refund:', error);
-      alert(error.response?.data?.error || 'Failed to process refund');
+      showError(error.response?.data?.error || 'Failed to process refund');
     } finally {
       setRefundLoading(false);
     }
@@ -227,6 +238,10 @@ function Transactions() {
     }
 
     return matchesSearch && matchesStatus && matchesDate;
+  }).sort((a, b) => {
+    const dateA = new Date(a.created_at);
+    const dateB = new Date(b.created_at);
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
   const formatCurrency = (amount) => {
@@ -272,6 +287,7 @@ function Transactions() {
   }
 
   return (
+    <MobilePullToRefresh onRefresh={handleRefresh}>
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerContent}>
@@ -318,6 +334,14 @@ function Transactions() {
           <option value="today">Today</option>
           <option value="week">This Week</option>
           <option value="month">This Month</option>
+        </select>
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+          className={styles.filterSelect}
+        >
+          <option value="desc">Newest First</option>
+          <option value="asc">Oldest First</option>
         </select>
       </div>
 
@@ -577,6 +601,7 @@ function Transactions() {
         </div>
       </Modal>
     </div>
+    </MobilePullToRefresh>
   );
 }
 

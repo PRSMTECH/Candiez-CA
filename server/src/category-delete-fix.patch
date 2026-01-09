@@ -1,0 +1,1 @@
+Fix: Remove updated_at reference from category soft delete (column does not exist in categories table)

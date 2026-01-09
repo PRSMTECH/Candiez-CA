@@ -1,0 +1,150 @@
+/* SkeletonDashboard - Dashboard loading state styles */
+
+.container {
+  padding: 1rem;
+}
+
+/* Header */
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.greeting {
+  width: 60% !important;
+  height: 28px !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.subtitle {
+  width: 40% !important;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.statIcon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: var(--radius-md) !important;
+  flex-shrink: 0;
+}
+
+.statInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.statValue {
+  width: 60% !important;
+  height: 24px !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.statLabel {
+  width: 80% !important;
+  height: 14px !important;
+}
+
+/* Quick Actions */
+.quickActions {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  width: 40% !important;
+  height: 18px !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.actionButton {
+  flex: 1;
+  height: 44px !important;
+  border-radius: var(--radius-md) !important;
+}
+
+/* Recent Activity */
+.recentSection {
+  margin-bottom: 1rem;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: var(--radius-md);
+}
+
+.activityIcon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0;
+}
+
+.activityInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.activityTitle {
+  width: 70% !important;
+  height: 14px !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.activityTime {
+  width: 40% !important;
+  height: 12px !important;
+}
+
+.activityAmount {
+  width: 50px !important;
+  height: 16px !important;
+  flex-shrink: 0;
+}
+
+/* Only show on mobile */
+@media (min-width: 640px) {
+  .container {
+    display: none;
+  }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 359px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+}

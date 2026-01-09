@@ -46,14 +46,33 @@
 /* Dark mode support */
 [data-theme="dark"] {
   --color-bg: var(--color-bg-dark);
+  --color-bg-light: #1F1F38;
   --color-card: var(--color-card-dark);
+  --color-card-light: var(--color-card-dark);
   --color-text: var(--color-text-dark);
+  --color-text-primary: var(--color-text-dark);
+  --color-text-secondary: #A0A0B0;
+  --color-border: #3A3A5A;
+  --color-border-light: #2E2E4A;
+  --color-input-bg: #252542;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --color-success-light: rgba(76, 175, 80, 0.2);
+  --color-warning-light: rgba(255, 152, 0, 0.2);
+  --color-error-light: rgba(244, 67, 54, 0.2);
 }
 
 [data-theme="light"] {
   --color-bg: var(--color-bg-light);
   --color-card: var(--color-card-light);
   --color-text: var(--color-text-primary);
+  --color-border: #E0E0E0;
+  --color-border-light: #F0F0F0;
+  --color-input-bg: #FFFFFF;
+  --color-success-light: rgba(76, 175, 80, 0.1);
+  --color-warning-light: rgba(255, 152, 0, 0.1);
+  --color-error-light: rgba(244, 67, 54, 0.1);
 }
 
 * {
@@ -68,6 +87,14 @@ body {
   color: var(--color-text-primary);
   line-height: 1.6;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode body overrides */
+[data-theme="dark"] body,
+[data-theme="dark"] {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -113,6 +140,11 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: 1.5rem;
+  transition: background-color 0.3s ease;
+}
+
+[data-theme="dark"] .card {
+  background: var(--color-card-dark);
 }
 
 /* Input Base Styles */
@@ -122,8 +154,10 @@ h1, h2, h3, h4, h5, h6 {
   border: 2px solid var(--color-primary-light);
   border-radius: var(--radius-md);
   font-size: 1rem;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
   width: 100%;
+  background-color: var(--color-input-bg, #FFFFFF);
+  color: var(--color-text-primary);
 }
 
 .input:focus {
@@ -133,6 +167,20 @@ h1, h2, h3, h4, h5, h6 {
 
 .input-error {
   border-color: var(--color-error);
+}
+
+[data-theme="dark"] .input {
+  background-color: var(--color-input-bg);
+  color: var(--color-text-dark);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .input:focus {
+  border-color: var(--color-primary);
+}
+
+[data-theme="dark"] .input::placeholder {
+  color: var(--color-text-secondary);
 }
 
 /* Loading Animation */
@@ -155,6 +203,16 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--radius-sm);
+}
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    #2E2E4A 25%,
+    #3A3A5A 50%,
+    #2E2E4A 75%
+  );
+  background-size: 200% 100%;
 }
 
 /* Toast Notification Base */

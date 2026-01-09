@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import Modal from '../components/Modal';
 import axios from 'axios';
 import styles from './Inventory.module.css';
 
 function Inventory() {
   const { user } = useAuth();
+  const { warning, error: showError, success } = useToast();
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,11 +115,11 @@ function Inventory() {
   const handleSubmitAdjustment = async (e) => {
     e.preventDefault();
     if (!adjustmentQty || adjustmentQty === 0) {
-      alert('Please enter a quantity');
+      warning('Please enter a quantity');
       return;
     }
     if (!adjustmentReason) {
-      alert('Please select a reason');
+      warning('Please select a reason');
       return;
     }
 
@@ -136,9 +138,10 @@ function Inventory() {
       // Refresh inventory
       await fetchInventory();
       closeAdjustModal();
+      success('Inventory adjusted successfully');
     } catch (error) {
       console.error('Adjustment failed:', error);
-      alert(error.response?.data?.error || 'Failed to adjust inventory');
+      showError(error.response?.data?.error || 'Failed to adjust inventory');
     } finally {
       setSubmitting(false);
     }

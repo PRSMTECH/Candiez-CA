@@ -16,7 +16,7 @@
   margin-left: 72px;
 }
 
-/* Responsive */
+/* Responsive - Tablet */
 @media (max-width: 768px) {
   .main {
     margin-left: 72px;
@@ -25,4 +25,26 @@
   .main.expanded {
     margin-left: 72px;
   }
+}
+
+/* Responsive - Mobile (<640px) */
+@media (max-width: 639px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .main {
+    margin-left: 0;
+    padding-top: 48px; /* Space for top NavBar */
+    padding-bottom: 60px; /* Space for bottom TabBar */
+  }
+
+  .main.expanded {
+    margin-left: 0;
+  }
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .layout {
+  background: var(--color-bg-dark);
 }

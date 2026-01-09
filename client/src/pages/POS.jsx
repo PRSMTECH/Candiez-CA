@@ -1,24 +1,89 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { useShift } from '../contexts/ShiftContext';
 import Modal from '../components/Modal';
+import MobilePOSGrid from '../components/MobilePOSGrid';
+import QuantityInput from '../components/QuantityInput';
+import SwipeableCartItem from '../components/SwipeableCartItem';
+import PaymentActionSheet from '../components/PaymentActionSheet';
+import ShiftStartModal from '../components/ShiftStartModal';
 import axios from 'axios';
 import styles from './POS.module.css';
 
+const CART_STORAGE_KEY = 'candiez_pos_cart';
+
 function POS() {
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { success, error: showError } = useToast();
+  const { currentShift, isShiftActive, startShift, recordTransaction } = useShift();
+  const [showShiftModal, setShowShiftModal] = useState(false);
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  // Initialize cart from sessionStorage
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.cart || [];
+      }
+    } catch (e) {
+      console.error('Error loading cart from storage:', e);
+    }
+    return [];
+  });
+  // Initialize selectedCustomer from sessionStorage
+  const [selectedCustomer, setSelectedCustomer] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.selectedCustomer || null;
+      }
+    } catch (e) {
+      console.error('Error loading customer from storage:', e);
+    }
+    return null;
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [paymentMethod, setPaymentMethod] = useState('cash');
+  // Initialize paymentMethod from sessionStorage
+  const [paymentMethod, setPaymentMethod] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.paymentMethod || 'cash';
+      }
+    } catch (e) {
+      console.error('Error loading payment method from storage:', e);
+    }
+    return 'cash';
+  });
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [receipt, setReceipt] = useState(null);
   const [categories, setCategories] = useState([]);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [showRedeemInput, setShowRedeemInput] = useState(false);
+  const [showPaymentSheet, setShowPaymentSheet] = useState(false);
+
+  // Save cart state to sessionStorage whenever it changes
+  useEffect(() => {
+    try {
+      const cartState = {
+        cart,
+        selectedCustomer,
+        paymentMethod
+      };
+      sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartState));
+    } catch (e) {
+      console.error('Error saving cart to storage:', e);
+    }
+  }, [cart, selectedCustomer, paymentMethod]);
 
   // Fetch products and customers on mount
   useEffect(() => {
@@ -87,6 +152,18 @@ function POS() {
     });
   }, []);
 
+  // Set cart item quantity directly (for NumberKeyboard)
+  const setQuantity = useCallback((productId, newQty) => {
+    setCart(prevCart => {
+      return prevCart.map(item => {
+        if (item.product_id !== productId) return item;
+        if (newQty <= 0) return null;
+        if (newQty > item.max_quantity) newQty = item.max_quantity;
+        return { ...item, quantity: newQty };
+      }).filter(Boolean);
+    });
+  }, []);
+
   // Remove item from cart
   const removeFromCart = useCallback((productId) => {
     setCart(prevCart => prevCart.filter(item => item.product_id !== productId));
@@ -98,6 +175,7 @@ function POS() {
     setSelectedCustomer(null);
     setPointsToRedeem(0);
     setShowRedeemInput(false);
+    sessionStorage.removeItem(CART_STORAGE_KEY);
   }, []);
 
   // Calculate totals
@@ -149,14 +227,16 @@ function POS() {
       setSelectedCustomer(null);
       setPointsToRedeem(0);
       setShowRedeemInput(false);
+      sessionStorage.removeItem(CART_STORAGE_KEY);
 
       // Refresh products to update stock levels
       const productsRes = await axios.get('/api/products');
       setProducts(productsRes.data.products || []);
+      success('Transaction completed successfully!');
 
     } catch (error) {
       console.error('Checkout error:', error);
-      alert(error.response?.data?.error || 'Failed to process transaction');
+      showError(error.response?.data?.error || 'Failed to process transaction');
     } finally {
       setProcessing(false);
     }
@@ -199,10 +279,63 @@ function POS() {
     }
   };
 
+  // Handle shift start
+  const handleStartShift = (startingCash) => {
+    const result = startShift(startingCash);
+    if (result) {
+      setShowShiftModal(false);
+      success(`Shift started with $${startingCash.toFixed(2)} in drawer`);
+    }
+  };
+
+  // Show shift start prompt if no active shift
+  useEffect(() => {
+    if (!loading && !isShiftActive) {
+      setShowShiftModal(true);
+    }
+  }, [loading, isShiftActive]);
+
   if (loading) {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>Loading POS...</div>
+      </div>
+    );
+  }
+
+  // If shift is not active, show prompt
+  if (!isShiftActive) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.shiftPrompt}>
+          <div className={styles.shiftPromptIcon}>⏰</div>
+          <h2 className={styles.shiftPromptTitle}>Start Your Shift</h2>
+          <p className={styles.shiftPromptText}>
+            You need to start a shift before using the Point of Sale.
+          </p>
+          <button
+            className={styles.startShiftBtn}
+            onClick={() => setShowShiftModal(true)}
+          >
+            Start Shift
+          </button>
+          <button
+            className={styles.backBtn}
+            onClick={() => navigate('/dashboard')}
+          >
+            Go Back to Dashboard
+          </button>
+        </div>
+
+        {showShiftModal && (
+          <ShiftStartModal
+            onStartShift={handleStartShift}
+            onCancel={() => {
+              setShowShiftModal(false);
+              navigate('/dashboard');
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -212,7 +345,14 @@ function POS() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Point of Sale</h1>
-          <p className={styles.subtitle}>Process sales and transactions</p>
+          <p className={styles.subtitle}>
+            {currentShift && (
+              <span className={styles.shiftInfo}>
+                Shift active since {new Date(currentShift.started_at).toLocaleTimeString()}
+                {' '}• Starting cash: ${currentShift.starting_cash.toFixed(2)}
+              </span>
+            )}
+          </p>
         </div>
       </div>
 
@@ -238,6 +378,7 @@ function POS() {
           </select>
         </div>
 
+        {/* Desktop Products Grid */}
         <div className={styles.productsGrid}>
           {filteredProducts.length === 0 ? (
             <div className={styles.emptyCart}>
@@ -272,6 +413,13 @@ function POS() {
             ))
           )}
         </div>
+
+        {/* Mobile Products Grid */}
+        <MobilePOSGrid
+          products={filteredProducts}
+          categories={categories}
+          onAddToCart={addToCart}
+        />
       </div>
 
       {/* Cart Section */}
@@ -389,37 +537,53 @@ function POS() {
               <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>Click products to add them</p>
             </div>
           ) : (
-            cart.map(item => (
-              <div key={item.product_id} className={styles.cartItem}>
-                <div className={styles.cartItemDetails}>
-                  <div className={styles.cartItemName}>{item.name}</div>
-                  <div className={styles.cartItemPrice}>
-                    ${item.price.toFixed(2)} each
+            <>
+              {/* Desktop cart items */}
+              <div className={styles.desktopOnly}>
+                {cart.map(item => (
+                  <div key={item.product_id} className={styles.cartItem}>
+                    <div className={styles.cartItemDetails}>
+                      <div className={styles.cartItemName}>{item.name}</div>
+                      <div className={styles.cartItemPrice}>
+                        ${item.price.toFixed(2)} each
+                      </div>
+                    </div>
+                    <div className={styles.cartItemControls}>
+                      <button
+                        className={styles.qtyBtn}
+                        onClick={() => updateQuantity(item.product_id, -1)}
+                      >
+                        −
+                      </button>
+                      <span className={styles.qty}>{item.quantity}</span>
+                      <button
+                        className={styles.qtyBtn}
+                        onClick={() => updateQuantity(item.product_id, 1)}
+                      >
+                        +
+                      </button>
+                      <button
+                        className={styles.removeBtn}
+                        onClick={() => removeFromCart(item.product_id)}
+                      >
+                        🗑
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className={styles.cartItemControls}>
-                  <button
-                    className={styles.qtyBtn}
-                    onClick={() => updateQuantity(item.product_id, -1)}
-                  >
-                    −
-                  </button>
-                  <span className={styles.qty}>{item.quantity}</span>
-                  <button
-                    className={styles.qtyBtn}
-                    onClick={() => updateQuantity(item.product_id, 1)}
-                  >
-                    +
-                  </button>
-                  <button
-                    className={styles.removeBtn}
-                    onClick={() => removeFromCart(item.product_id)}
-                  >
-                    🗑
-                  </button>
-                </div>
+                ))}
               </div>
-            ))
+              {/* Mobile cart items with swipe gestures */}
+              <div className={styles.mobileOnly}>
+                {cart.map(item => (
+                  <SwipeableCartItem
+                    key={item.product_id}
+                    item={item}
+                    onQuantityChange={setQuantity}
+                    onRemove={removeFromCart}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
 
@@ -449,7 +613,8 @@ function POS() {
 
         {/* Payment */}
         <div className={styles.paymentSection}>
-          <div className={styles.paymentMethods}>
+          {/* Desktop payment buttons */}
+          <div className={`${styles.paymentMethods} ${styles.desktopOnly}`}>
             <button
               className={`${styles.paymentBtn} ${paymentMethod === 'cash' ? styles.active : ''}`}
               onClick={() => setPaymentMethod('cash')}
@@ -463,6 +628,21 @@ function POS() {
               💳 Debit
             </button>
           </div>
+          {/* Mobile payment selector */}
+          <div className={`${styles.mobilePaymentSelector} ${styles.mobileOnly}`}>
+            <button
+              className={styles.paymentSelectorBtn}
+              onClick={() => setShowPaymentSheet(true)}
+            >
+              <span className={styles.paymentIcon}>
+                {paymentMethod === 'cash' ? '💵' : paymentMethod === 'debit' ? '💳' : '💰'}
+              </span>
+              <span className={styles.paymentLabel}>
+                {paymentMethod === 'cash' ? 'Cash' : paymentMethod === 'debit' ? 'Debit' : 'Split'}
+              </span>
+              <span className={styles.paymentArrow}>▼</span>
+            </button>
+          </div>
           <button
             className={styles.checkoutBtn}
             onClick={handleCheckout}
@@ -471,6 +651,14 @@ function POS() {
             {processing ? 'Processing...' : `Complete Sale - $${total.toFixed(2)}`}
           </button>
         </div>
+
+        {/* Mobile Payment ActionSheet */}
+        <PaymentActionSheet
+          visible={showPaymentSheet}
+          onClose={() => setShowPaymentSheet(false)}
+          onSelect={setPaymentMethod}
+          currentMethod={paymentMethod}
+        />
       </div>
 
       {/* Receipt Modal */}

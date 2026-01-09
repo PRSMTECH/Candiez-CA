@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import axios from 'axios';
+import SkeletonDashboard from '../components/SkeletonDashboard';
 import styles from './Dashboard.module.css';
 
 function Dashboard() {
   const { user } = useAuth();
+  const { success, error: showError, warning, info } = useToast();
   const [stats, setStats] = useState({
     todaySales: 0,
     todayTransactions: 0,
@@ -72,10 +75,27 @@ function Dashboard() {
     return 'Good evening';
   };
 
+  // Test function to show multiple notifications
+  const handleTestNotifications = () => {
+    success('Transaction completed successfully!');
+    setTimeout(() => {
+      info('New customer added to the system');
+    }, 200);
+    setTimeout(() => {
+      warning('Low stock alert: Product running low');
+    }, 400);
+    setTimeout(() => {
+      showError('Failed to sync inventory - will retry');
+    }, 600);
+  };
+
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Loading dashboard...</div>
+        {/* Desktop loading message */}
+        <div className={`${styles.loading} ${styles.desktopOnly}`}>Loading dashboard...</div>
+        {/* Mobile skeleton loading */}
+        <SkeletonDashboard />
       </div>
     );
   }
@@ -211,6 +231,14 @@ function Dashboard() {
                 <span className={styles.actionIcon}>📊</span>
                 <span>View Reports</span>
               </Link>
+              <button
+                onClick={handleTestNotifications}
+                className={styles.actionButton}
+                type="button"
+              >
+                <span className={styles.actionIcon}>🔔</span>
+                <span>Test Notifications</span>
+              </button>
             </div>
           </div>
         </div>

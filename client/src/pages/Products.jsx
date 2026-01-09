@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import ConfirmDialog from '../components/ConfirmDialog';
+import { useToast } from '../contexts/ToastContext';
+import MobileConfirmDialog from '../components/MobileConfirmDialog';
+import MobilePullToRefresh from '../components/MobilePullToRefresh';
+import MobileSearchBar from '../components/MobileSearchBar';
+import MobileFloatingAction from '../components/MobileFloatingAction';
 import axios from 'axios';
 import styles from './Products.module.css';
+
+const PRODUCTS_FILTER_KEY = 'candiez_products_filters';
 
 // Mock product data for development (California cannabis dispensary products)
 const mockProducts = [
@@ -100,15 +106,124 @@ const mockProducts = [
   }
 ];
 
+// Helper to get saved filters from sessionStorage
+const getSavedFilters = () => {
+  try {
+    const saved = sessionStorage.getItem(PRODUCTS_FILTER_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Error loading filters from storage:', e);
+  }
+  return null;
+};
+
 function Products() {
   const { user } = useAuth();
+  const { success, error: showError } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // Get initial filter values: URL params take priority, then sessionStorage, then defaults
+  const getInitialFilters = () => {
+    const urlCategory = searchParams.get('category');
+    const urlSearch = searchParams.get('search');
+    const urlSort = searchParams.get('sort');
+    const urlMinPrice = searchParams.get('minPrice');
+    const urlMaxPrice = searchParams.get('maxPrice');
+
+    // If URL has params, use them
+    if (urlCategory || urlSearch || urlSort || urlMinPrice || urlMaxPrice) {
+      let sortBy = 'name';
+      let sortOrder = 'asc';
+      if (urlSort) {
+        const [field, order] = urlSort.split('-');
+        if (field) sortBy = field;
+        if (order) sortOrder = order;
+      }
+      return {
+        searchTerm: urlSearch || '',
+        categoryFilter: urlCategory || 'all',
+        minPrice: urlMinPrice || '',
+        maxPrice: urlMaxPrice || '',
+        sortBy,
+        sortOrder
+      };
+    }
+
+    // Otherwise, use sessionStorage
+    const saved = getSavedFilters();
+    return {
+      searchTerm: saved?.searchTerm || '',
+      categoryFilter: saved?.categoryFilter || 'all',
+      minPrice: saved?.minPrice || '',
+      maxPrice: saved?.maxPrice || '',
+      sortBy: saved?.sortBy || 'name',
+      sortOrder: saved?.sortOrder || 'asc'
+    };
+  };
+
+  const initialFilters = getInitialFilters();
+  const [searchTerm, setSearchTerm] = useState(initialFilters.searchTerm);
+  const [categoryFilter, setCategoryFilter] = useState(initialFilters.categoryFilter);
+  const [minPrice, setMinPrice] = useState(initialFilters.minPrice);
+  const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice);
+  const [sortBy, setSortBy] = useState(initialFilters.sortBy);
+  const [sortOrder, setSortOrder] = useState(initialFilters.sortOrder);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Save filter state to sessionStorage whenever it changes
+  useEffect(() => {
+    try {
+      const filterState = {
+        searchTerm,
+        categoryFilter,
+        minPrice,
+        maxPrice,
+        sortBy,
+        sortOrder
+      };
+      sessionStorage.setItem(PRODUCTS_FILTER_KEY, JSON.stringify(filterState));
+    } catch (e) {
+      console.error('Error saving filters to storage:', e);
+    }
+
+    // Also update URL params (for bookmarking)
+    const newParams = new URLSearchParams();
+    if (categoryFilter && categoryFilter !== 'all') {
+      newParams.set('category', categoryFilter);
+    }
+    if (searchTerm) {
+      newParams.set('search', searchTerm);
+    }
+    if (sortBy !== 'name' || sortOrder !== 'asc') {
+      newParams.set('sort', `${sortBy}-${sortOrder}`);
+    }
+    if (minPrice) {
+      newParams.set('minPrice', minPrice);
+    }
+    if (maxPrice) {
+      newParams.set('maxPrice', maxPrice);
+    }
+
+    // Update URL without triggering a navigation
+    const newSearch = newParams.toString();
+    const currentSearch = window.location.search.slice(1); // remove leading '?'
+    if (newSearch !== currentSearch) {
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchTerm, categoryFilter, minPrice, maxPrice, sortBy, sortOrder, setSearchParams]);
 
   useEffect(() => {
     fetchProducts();
@@ -130,8 +245,8 @@ function Products() {
     sku: product.sku
   });
 
-  const fetchProducts = async () => {
-    setLoading(true);
+  const fetchProducts = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get('/api/products', {
@@ -146,9 +261,14 @@ function Products() {
       // Use empty array if API fails
       setProducts([]);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
-  };
+  }, []);
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    await fetchProducts(false);
+  }, [fetchProducts]);
 
   const handleEdit = (productId) => {
     navigate(`/products/${productId}/edit`);
@@ -182,6 +302,50 @@ function Products() {
     setDeleteDialogOpen(false);
   };
 
+  // Check if any filters are active
+  const hasActiveFilters = searchTerm !== '' || categoryFilter !== 'all' || minPrice !== '' || maxPrice !== '' || sortBy !== 'name' || sortOrder !== 'asc';
+
+  // Clear all filters function
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setCategoryFilter('all');
+    setMinPrice('');
+    setMaxPrice('');
+    setSortBy('name');
+    setSortOrder('asc');
+    // Also clear from sessionStorage
+    sessionStorage.removeItem(PRODUCTS_FILTER_KEY);
+  };
+
+  // Handle sort change
+  const handleSortChange = (e) => {
+    const value = e.target.value;
+    if (value === 'price-asc') {
+      setSortBy('price');
+      setSortOrder('asc');
+    } else if (value === 'price-desc') {
+      setSortBy('price');
+      setSortOrder('desc');
+    } else if (value === 'name-asc') {
+      setSortBy('name');
+      setSortOrder('asc');
+    } else if (value === 'name-desc') {
+      setSortBy('name');
+      setSortOrder('desc');
+    } else if (value === 'stock-asc') {
+      setSortBy('stock');
+      setSortOrder('asc');
+    } else if (value === 'stock-desc') {
+      setSortBy('stock');
+      setSortOrder('desc');
+    }
+  };
+
+  // Get current sort value for select
+  const getSortValue = () => {
+    return `${sortBy}-${sortOrder}`;
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -190,10 +354,182 @@ function Products() {
 
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
 
-    return matchesSearch && matchesCategory;
+    // Price range filtering
+    const minPriceNum = minPrice !== '' ? parseFloat(minPrice) : null;
+    const maxPriceNum = maxPrice !== '' ? parseFloat(maxPrice) : null;
+    const matchesMinPrice = minPriceNum === null || product.price >= minPriceNum;
+    const matchesMaxPrice = maxPriceNum === null || product.price <= maxPriceNum;
+
+    return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
   });
 
+  // Sort the filtered products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    let comparison = 0;
+
+    if (sortBy === 'price') {
+      comparison = a.price - b.price;
+    } else if (sortBy === 'name') {
+      comparison = a.name.localeCompare(b.name);
+    } else if (sortBy === 'stock') {
+      comparison = a.stock - b.stock;
+    }
+
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryFilter, minPrice, maxPrice, sortBy, sortOrder]);
+
   const categories = [...new Set(products.map(p => p.category))];
+
+  // Export filtered/sorted products to CSV
+  const exportToCSV = () => {
+    // Use sortedProducts (which is already filtered and sorted)
+    const headers = ['ID', 'Name', 'Category', 'Strain', 'THC %', 'CBD %', 'Price', 'Unit Price', 'Unit', 'Stock', 'Status'];
+
+    const csvRows = [
+      headers.join(','),
+      ...sortedProducts.map(product => [
+        product.id,
+        `"${product.name || ''}"`,
+        `"${product.category || ''}"`,
+        `"${product.strain || ''}"`,
+        product.thcContent || 0,
+        product.cbdContent || 0,
+        product.price || 0,
+        product.unitPrice || 0,
+        `"${product.unit || ''}"`,
+        product.stock || 0,
+        `"${product.status || ''}"`
+      ].join(','))
+    ];
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `products_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Parse CSV content
+  const parseCSV = (content) => {
+    const lines = content.trim().split('\n');
+    if (lines.length < 2) {
+      throw new Error('CSV file must have a header row and at least one data row');
+    }
+
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    const expectedHeaders = ['ID', 'Name', 'Category', 'Strain', 'THC %', 'CBD %', 'Price', 'Unit Price', 'Unit', 'Stock', 'Status'];
+
+    // Check if headers match
+    const headersMatch = expectedHeaders.every((h, i) => headers[i]?.toLowerCase() === h.toLowerCase());
+    if (!headersMatch) {
+      throw new Error('CSV headers do not match expected format');
+    }
+
+    const importedProducts = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      // Parse CSV line respecting quoted values
+      const values = [];
+      let current = '';
+      let inQuotes = false;
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(current.trim().replace(/^"|"$/g, ''));
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      values.push(current.trim().replace(/^"|"$/g, ''));
+
+      if (values.length < 11) continue;
+
+      importedProducts.push({
+        id: parseInt(values[0]) || Date.now() + i,
+        name: values[1] || '',
+        category: values[2] || 'Flower',
+        strain: values[3] || 'Hybrid',
+        thcContent: parseFloat(values[4]) || 0,
+        cbdContent: parseFloat(values[5]) || 0,
+        price: parseFloat(values[6]) || 0,
+        unitPrice: parseFloat(values[7]) || 0,
+        unit: values[8] || 'gram',
+        stock: parseInt(values[9]) || 0,
+        status: values[10] || 'active'
+      });
+    }
+
+    return importedProducts;
+  };
+
+  // Import from CSV file
+  const handleImportCSV = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    setImportMessage(null);
+
+    try {
+      const content = await file.text();
+      const importedProducts = parseCSV(content);
+
+      if (importedProducts.length === 0) {
+        throw new Error('No valid products found in CSV');
+      }
+
+      // Merge imported products with existing ones
+      // Products with matching IDs are updated, new IDs are added
+      setProducts(prev => {
+        const productMap = new Map(prev.map(p => [p.id, p]));
+
+        for (const product of importedProducts) {
+          productMap.set(product.id, product);
+        }
+
+        return Array.from(productMap.values());
+      });
+
+      setImportMessage({
+        type: 'success',
+        text: `Successfully imported ${importedProducts.length} products`
+      });
+      success(`Imported ${importedProducts.length} products`);
+    } catch (err) {
+      setImportMessage({
+        type: 'error',
+        text: err.message || 'Failed to import CSV'
+      });
+      showError(err.message || 'Failed to import CSV');
+    } finally {
+      setImporting(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -231,6 +567,7 @@ function Products() {
   }
 
   return (
+    <MobilePullToRefresh onRefresh={handleRefresh}>
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerContent}>
@@ -239,13 +576,55 @@ function Products() {
             Manage your cannabis product inventory • {products.length} products
           </p>
         </div>
-        <Link to="/products/new" className={styles.addButton}>
-          + Add Product
-        </Link>
+        <div className={styles.headerButtons}>
+          <button
+            onClick={exportToCSV}
+            className={styles.exportButton}
+            title="Export filtered products to CSV"
+          >
+            Export CSV
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            onChange={handleImportCSV}
+            className={styles.hiddenFileInput}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className={styles.importButton}
+            title="Import products from CSV"
+            disabled={importing}
+          >
+            {importing ? 'Importing...' : 'Import CSV'}
+          </button>
+          <Link to="/products/new" className={styles.addButton}>
+            + Add Product
+          </Link>
+        </div>
+      </div>
+
+      {/* Import result message */}
+      {importMessage && (
+        <div className={`${styles.importMessage} ${importMessage.type === 'success' ? styles.importSuccess : styles.importError}`}>
+          {importMessage.text}
+        </div>
+      )}
+
+      {/* Mobile SearchBar with voice input */}
+      <div className={styles.mobileSearchWrapper}>
+        <MobileSearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search products..."
+          debounceMs={300}
+          showVoice={true}
+        />
       </div>
 
       <div className={styles.filters}>
-        <div className={styles.searchWrapper}>
+        <div className={`${styles.searchWrapper} ${styles.desktopOnly}`}>
           <input
             type="text"
             placeholder="Search by name, category, or strain..."
@@ -264,11 +643,59 @@ function Products() {
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
+        <div className={styles.priceRange}>
+          <input
+            type="number"
+            placeholder="Min $"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            className={styles.priceInput}
+            min="0"
+            step="0.01"
+          />
+          <span className={styles.priceSeparator}>-</span>
+          <input
+            type="number"
+            placeholder="Max $"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className={styles.priceInput}
+            min="0"
+            step="0.01"
+          />
+        </div>
+        <select
+          value={getSortValue()}
+          onChange={handleSortChange}
+          className={styles.sortSelect}
+          aria-label="Sort by"
+        >
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="price-asc">Price (Low to High)</option>
+          <option value="price-desc">Price (High to Low)</option>
+          <option value="stock-asc">Stock (Low to High)</option>
+          <option value="stock-desc">Stock (High to Low)</option>
+        </select>
+        {hasActiveFilters && (
+          <button
+            onClick={handleClearFilters}
+            className={styles.clearFiltersButton}
+            title="Clear all filters"
+          >
+            Clear All Filters
+          </button>
+        )}
       </div>
 
-      {filteredProducts.length === 0 ? (
+      {sortedProducts.length === 0 ? (
         <div className={styles.empty}>
           <p>No products found matching your search.</p>
+          {hasActiveFilters && (
+            <button onClick={handleClearFilters} className={styles.clearFiltersLink}>
+              Clear all filters
+            </button>
+          )}
         </div>
       ) : (
         <div className={styles.tableWrapper}>
@@ -285,7 +712,7 @@ function Products() {
               </tr>
             </thead>
             <tbody>
-              {filteredProducts.map((product) => (
+              {paginatedProducts.map((product) => (
                 <tr key={product.id}>
                   <td>
                     <div className={styles.productInfo}>
@@ -351,11 +778,67 @@ function Products() {
         </div>
       )}
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <div className={styles.paginationInfo}>
+            Showing {startIndex + 1}-{Math.min(endIndex, sortedProducts.length)} of {sortedProducts.length} products
+          </div>
+          <div className={styles.paginationControls}>
+            <button
+              className={styles.pageButton}
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              aria-label="First page"
+            >
+              «
+            </button>
+            <button
+              className={styles.pageButton}
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              aria-label="Previous page"
+            >
+              ‹
+            </button>
+            <div className={styles.pageNumbers}>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  className={`${styles.pageNumber} ${currentPage === page ? styles.active : ''}`}
+                  onClick={() => setCurrentPage(page)}
+                  aria-label={`Page ${page}`}
+                  aria-current={currentPage === page ? 'page' : undefined}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+            <button
+              className={styles.pageButton}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Next page"
+            >
+              ›
+            </button>
+            <button
+              className={styles.pageButton}
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              aria-label="Last page"
+            >
+              »
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={styles.userNote}>
         Logged in as: {user?.firstName || 'User'} ({user?.role || 'staff'})
       </div>
 
-      <ConfirmDialog
+      <MobileConfirmDialog
         isOpen={deleteDialogOpen}
         title="Delete Product"
         message={productToDelete
@@ -364,13 +847,21 @@ function Products() {
         confirmText="Delete"
         cancelText="Cancel"
         onConfirm={handleDeleteConfirm}
-        onCancel={() => {
+        onClose={() => {
           setDeleteDialogOpen(false);
           setProductToDelete(null);
         }}
         variant="danger"
       />
+
+      {/* Mobile Floating Action Button */}
+      <MobileFloatingAction
+        icon="+"
+        label="Add"
+        to="/products/new"
+      />
     </div>
+    </MobilePullToRefresh>
   );
 }
 
