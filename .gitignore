@@ -47,3 +47,9 @@ Candiez-CA/
 
 # Features database is tracked in parent autocoder
 features.db
+
+# Archive (legacy/duplicate directories)
+.archive/
+
+# Playwright MCP cache
+.playwright-mcp/

@@ -1,58 +1,102 @@
-# Candiez-CA
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-In%20Development-purple?style=for-the-badge" alt="Status"/>
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react" alt="React"/>
+  <img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite" alt="SQLite"/>
+</p>
 
-A CRM and inventory management system for a California marijuana dispensary. Features a playful, candy-themed purple/lavender design that matches the Candiez brand identity.
+<h1 align="center">Candiez-CA</h1>
+
+<p align="center">
+  <strong>CRM & Inventory Management System for California Cannabis Dispensary</strong>
+</p>
+
+<p align="center">
+  A playful, candy-themed purple/lavender system for customer management, inventory tracking, and point-of-sale operations.
+</p>
+
+---
 
 ## Overview
 
-Candiez-CA focuses on two core areas:
-1. **Client Acquisition** - Customer tracking, loyalty programs, communication
-2. **Inventory Management** - Product catalog, stock levels, compliance tracking
+Candiez-CA is a full-stack dispensary management solution focusing on:
 
-## Technology Stack
+| Module | Description |
+|--------|-------------|
+| **Customer Management** | Profiles, purchase history, loyalty tracking |
+| **Inventory Management** | Stock levels, suppliers, compliance tracking |
+| **Point of Sale** | Transaction processing, receipts, shift management |
+| **Loyalty Program** | Points, tiers (Bronze/Silver/Gold/Platinum), redemption |
+| **Reporting** | Sales analytics, inventory reports, customer metrics |
+
+---
+
+## Tech Stack
+
+<table>
+<tr>
+<td width="50%">
 
 ### Frontend
-- **Framework**: React 18 with Vite
-- **Styling**: CSS Modules with custom properties
-- **State Management**: React Context + useReducer
+- **Framework**: React 18 + Vite
+- **Styling**: CSS Modules + Custom Properties
+- **State**: React Context + useReducer
 - **Routing**: React Router v6
-- **Icons**: Lucide React
+- **UI**: antd-mobile, Lucide React
 - **Charts**: Recharts
 
+</td>
+<td width="50%">
+
 ### Backend
-- **Runtime**: Node.js with Express
-- **Database**: SQLite with better-sqlite3
-- **Authentication**: JWT with bcrypt
+- **Runtime**: Node.js + Express
+- **Database**: SQLite (better-sqlite3)
+- **Auth**: JWT + bcrypt
 - **Validation**: Zod
+
+</td>
+</tr>
+</table>
+
+---
 
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- npm or yarn
 
-### Setup
+- Node.js 18+
+- npm
+
+### Installation
 
 ```bash
-# Make init.sh executable
-chmod +x init.sh
+# Clone and setup
+git clone <repository>
+cd Candiez-CA
 
 # Run setup script
-./init.sh
+chmod +x init.sh && ./init.sh
 ```
 
 ### Development
 
 ```bash
-# Terminal 1 - Start the server
+# Terminal 1 - Server (port 3001)
 cd server && npm run dev
 
-# Terminal 2 - Start the client
+# Terminal 2 - Client (port 5173)
 cd client && npm run dev
 ```
 
-### Access
-- **Client**: http://localhost:5173
-- **Server API**: http://localhost:3001/api
+### Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@candiez.com | admin123 |
+| Manager | manager@candiez.com | manager123 |
+| Budtender | budtender@candiez.com | budtender123 |
+
+---
 
 ## Project Structure
 
@@ -60,171 +104,111 @@ cd client && npm run dev
 Candiez-CA/
 ├── client/                 # React frontend
 │   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   ├── contexts/      # React contexts
-│   │   ├── hooks/         # Custom hooks
-│   │   ├── pages/         # Page components
-│   │   ├── styles/        # CSS modules
-│   │   └── utils/         # Helper functions
-│   └── public/            # Static assets
-├── server/                # Express backend
+│   │   ├── components/     # UI components (CSS Modules)
+│   │   ├── contexts/       # React Context providers
+│   │   ├── hooks/          # Custom hooks
+│   │   └── pages/          # Route pages
+│   └── package.json
+├── server/                 # Express backend
 │   ├── src/
-│   │   ├── routes/       # API route handlers
-│   │   ├── middleware/   # Express middleware
-│   │   ├── models/       # Database models
-│   │   ├── services/     # Business logic
-│   │   └── utils/        # Helper functions
-│   └── data/             # SQLite database
-├── prompts/              # AutoCoder prompts
-├── features.db           # Feature tracking database
-├── init.sh              # Environment setup script
+│   │   ├── db/            # Database schema
+│   │   └── index.js       # API endpoints
+│   └── package.json
+├── scripts/
+│   ├── migrations/        # Database migration scripts
+│   └── utils/             # Utility scripts
+├── docs/                  # Documentation
+│   ├── app_spec.txt       # Full specification
+│   └── claude-progress.txt
+├── prompts/               # AutoCoder prompts
+├── .memory-bank/          # Project context
+├── CLAUDE.md              # Claude Code guidance
 └── README.md
 ```
 
-## User Roles
+---
 
-| Role | Permissions |
-|------|-------------|
-| **Admin** | Full system access, user management, settings |
-| **Manager** | Reports, inventory, customer management, transactions |
-| **Budtender** | POS, customer lookup, view products |
+## User Roles & Permissions
+
+| Feature | Admin | Manager | Budtender |
+|---------|:-----:|:-------:|:---------:|
+| Dashboard | Full | View | View |
+| Customers | Full | Full | Limited |
+| Products | Full | Full | View |
+| Inventory | Full | Full | View |
+| POS | Full | Full | Full |
+| Reports | Full | Full | - |
+| Settings | Full | Limited | - |
+| Users | Full | - | - |
+
+---
 
 ## Design System
 
 ### Color Palette
 
-**Primary (Lavender Purple)**
-- Primary: `#B57EDC`
-- Primary Light: `#E8D5F2`
-- Primary Dark: `#7B4A9E`
-
-**Candy Accents**
-- Teal: `#5BC0BE`
-- Pink: `#F5A9B8`
-- Yellow: `#F7DC6F`
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Primary | `#B57EDC` | Buttons, links, accents |
+| Primary Light | `#E8D5F2` | Backgrounds, hover states |
+| Primary Dark | `#7B4A9E` | Headers, emphasis |
+| Teal Accent | `#5BC0BE` | Success, positive actions |
+| Pink Accent | `#F5A9B8` | Notifications, highlights |
+| Yellow Accent | `#F7DC6F` | Warnings, loyalty points |
 
 ### Typography
+
 - **Headings**: Poppins (Bold, Semi-Bold)
 - **Body**: Inter (Regular, Medium)
 - **Monospace**: JetBrains Mono (prices, codes)
 
-### Effects
-- Gradient buttons with hover glow
-- Soft shadows with purple tint
-- Rounded corners (8px default, 16px cards)
-- Glassmorphism for modals
-- Smooth animations
+---
 
-## Features
+## API Reference
 
-### Customer Management (CRM)
-- Customer profiles with purchase history
-- Customer search and segmentation
-- Notes, tags, and preferences
-- Referral tracking
-- Medical card expiration tracking
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/login` | POST | User authentication |
+| `/api/customers` | GET/POST | Customer CRUD |
+| `/api/products` | GET/POST | Product CRUD |
+| `/api/categories` | GET/POST | Category management |
+| `/api/pos/transaction` | POST | Process sale |
+| `/api/inventory` | GET | Stock levels |
+| `/api/inventory/adjust` | POST | Stock adjustments |
+| `/api/reports/*` | GET | Various analytics |
+| `/api/settings` | GET/PUT | System configuration |
+| `/api/users` | GET/POST | User management (admin) |
 
-### Loyalty Program
-- Points-based rewards
-- Tier levels (Bronze, Silver, Gold, Platinum)
-- Birthday and referral bonuses
-- Points redemption at checkout
+---
 
-### Inventory Management
-- Real-time stock tracking
-- Low stock alerts
-- Batch/lot number tracking
-- Supplier management
-- Expiration date tracking
-
-### Point of Sale
-- Quick product lookup
-- Cart management
-- Multiple payment types
-- Receipt generation
-- Shift management
-
-### Compliance (California)
-- Daily purchase limit tracking
-- Age verification (21+)
-- Lab testing info display
-- Required receipt warnings
-
-### Reporting
-- Sales dashboard with charts
-- Inventory reports
-- Customer acquisition metrics
-- Loyalty program analytics
-- Export to CSV/PDF
-
-## API Endpoints
-
-| Endpoint | Description |
-|----------|-------------|
-| `POST /api/auth/login` | User authentication |
-| `GET /api/customers` | List customers |
-| `GET /api/products` | List products |
-| `POST /api/transactions` | Create transaction |
-| `GET /api/reports/sales` | Sales report |
-
-See `prompts/app_spec.txt` for complete API documentation.
-
-## Environment Variables
-
-### Server (.env)
-```
-PORT=3001
-JWT_SECRET=your-secret-key
-DATABASE_PATH=./data/candiez.db
-DEFAULT_TAX_RATE=15.0
-```
-
-### Client (.env)
-```
-VITE_API_URL=http://localhost:3001/api
-```
-
-## AutoCoder Status
-
-- [x] Specification created
-- [x] Features initialized (148 tests)
-- [x] Development in progress (some features implemented)
-
-### Feature Categories
-- Security & Access Control
-- Navigation Integrity
-- Real Data Verification
-- Workflow Completeness
-- Error Handling
-- UI-Backend Integration
-- State & Persistence
-- Form Validation
-- Responsive & Layout
-- Accessibility
-- Performance
-- UI Style & Design
-
-## Development Commands
+## Commands
 
 ```bash
-# Install all dependencies
-./init.sh
+# Development
+cd server && npm run dev      # Start server with auto-reload
+cd client && npm run dev      # Start Vite dev server
 
-# Run server in development mode
-cd server && npm run dev
+# Production
+cd client && npm run build    # Build frontend
+cd server && npm start        # Start production server
 
-# Run client in development mode
-cd client && npm run dev
+# Database
+cd server && npm run db:init  # Initialize database
 
-# Initialize database
-cd server && npm run db:init
-
-# Build client for production
-cd client && npm run build
-
-# Run linting
-cd client && npm run lint
+# Linting
+cd client && npm run lint     # ESLint check
 ```
+
+---
+
+## Ports
+
+| Service | Port |
+|---------|------|
+| Client (Vite) | 5173 |
+| Server (Express) | 3001 |
+
+---
 
 ## License
 
@@ -232,5 +216,9 @@ Proprietary - Candiez California
 
 ---
 
-Created: January 8, 2026
-AutoCoder Autonomous Project
+<p align="center">
+  <sub>Built with AutoCoder Autonomous Agent</sub>
+</p>
+<p align="center">
+  <sub>Created: January 2026</sub>
+</p>
