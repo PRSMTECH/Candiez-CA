@@ -1,14 +1,14 @@
 # Railway/Nixpacks build configuration
-# This tells Railway to build from the server directory
+# Builds the Express server from the /server directory
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "npm"]
+nixPkgs = ["nodejs_20", "npm", "python3", "gcc", "gnumake"]
 
 [phases.install]
-cmds = ["cd server && npm install"]
-
-[phases.build]
-cmds = ["cd server && npm run build || true"]
+cmds = [
+  "cd server && npm ci --include=dev || npm install",
+  "cd server && npm rebuild better-sqlite3 bcrypt"
+]
 
 [start]
 cmd = "cd server && npm start"

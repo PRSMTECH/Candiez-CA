@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "db:init": "node src/scripts/init-db.js"
+    "db:init": "node src/scripts/init-db.js",
+    "postinstall": "npm rebuild better-sqlite3 bcrypt || true"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
