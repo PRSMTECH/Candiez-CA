@@ -1,0 +1,14 @@
+# Railway/Nixpacks build configuration
+# This tells Railway to build from the server directory
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+
+[phases.install]
+cmds = ["cd server && npm install"]
+
+[phases.build]
+cmds = ["cd server && npm run build || true"]
+
+[start]
+cmd = "cd server && npm start"
