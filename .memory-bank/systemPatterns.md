@@ -193,7 +193,7 @@ import styles from './Component.module.css'
 5. Protected routes check auth state
 6. API requests include Bearer token
 
-### Sign-Up Flow (New)
+### Sign-Up Flow
 1. User fills signup form (with optional referral code)
 2. Server validates input with Zod
 3. Creates user with `status: 'pending'`, `email_verified: 0`
@@ -203,6 +203,18 @@ import styles from './Component.module.css'
 7. User clicks verification link
 8. Server verifies token, sets `email_verified: 1`
 9. User can now log in
+
+### Password Reset Flow
+1. User clicks "Forgot password?" link on login page
+2. Navigates to /forgot-password page
+3. Enters email address
+4. Server generates JWT reset token (1-hour expiry)
+5. Stores token hash in password_reset_token column
+6. Sends password reset email with link to /reset-password?token=XXX
+7. User clicks link, enters new password
+8. Server verifies token, updates password (bcrypt hashed)
+9. Clears reset token from database
+10. User redirected to login page
 
 ### Referral Code Pattern
 ```javascript

@@ -229,4 +229,49 @@
 - Auto-deploy: Enabled on push to master
 
 ---
+
+## 2026-01-12 - Password Reset Flow Implementation
+
+**Context**: Users need ability to reset forgotten passwords securely
+
+**Decision**: Implement JWT-based password reset with token expiry and professional email templates
+
+**Rationale**:
+- JWT tokens with 1-hour expiry balance security and usability
+- Same Resend API used for email verification (consistency)
+- Dark candy theme email templates match brand identity
+- Production URL defaults ensure emails work without Railway env var configuration
+
+**Alternatives Considered**:
+- Magic links (less secure for password reset)
+- SMS-based reset (added complexity, cost)
+- Admin-only password reset (poor UX)
+
+**Impact**:
+- New pages: /forgot-password, /reset-password
+- Database columns: password_reset_token, password_reset_expires
+- API endpoints: /api/auth/forgot-password, /api/auth/reset-password
+- Email template: sendPasswordResetEmail() function
+- CLIENT_URL defaults to https://candiez.shop (production)
+
+---
+
+## 2026-01-12 - Production URL Defaults
+
+**Context**: Railway env vars couldn't be set via CLI (required interactive login)
+
+**Decision**: Change code defaults from localhost to production URL (https://candiez.shop)
+
+**Rationale**:
+- Railway deployment auto-deploys from GitHub
+- If RAILWAY_ENVIRONMENT env var not set, defaults are used
+- Production URL is safer default than localhost
+- Health endpoint exposes clientUrl for verification
+
+**Impact**:
+- email.js: CLIENT_URL defaults to 'https://candiez.shop'
+- index.js: Health endpoint shows clientUrl for config verification
+- All email links point to production by default
+
+---
 **Usage**: Add entry whenever making significant technical decisions
