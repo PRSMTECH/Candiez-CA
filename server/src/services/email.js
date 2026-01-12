@@ -3,7 +3,8 @@ import crypto from 'crypto';
 
 // Email configuration
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Candiez Dispensary <noreply@candiez.shop>';
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+// Use production URL as fallback - Railway should have CLIENT_URL set, but default to production
+const CLIENT_URL = process.env.CLIENT_URL || 'https://candiez.shop';
 
 // Logo URLs from Supabase storage
 const LOGO_PRIMARY = 'https://hhdmovjjvlfkspqrzsjz.supabase.co/storage/v1/object/public/public-media/candiez/images/logos/official-logo.png';
