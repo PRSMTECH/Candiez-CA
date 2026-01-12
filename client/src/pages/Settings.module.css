@@ -247,6 +247,38 @@
   color: var(--color-text-secondary);
 }
 
+.tutorialDescription {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 1.25rem 0;
+  line-height: 1.6;
+}
+
+.tutorialButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tutorialButton:hover {
+  background: linear-gradient(135deg, #7e22ce, #6d28d9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+}
+
+.tutorialButton:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -295,4 +327,8 @@
 
 [data-theme="dark"] .userNote {
   border-top-color: var(--color-border);
+}
+
+[data-theme="dark"] .tutorialDescription {
+  color: var(--color-text-secondary);
 }

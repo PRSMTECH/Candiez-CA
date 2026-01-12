@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
+import { useTutorial } from '../contexts/TutorialContext';
+import { Eye, EyeOff, Loader2, Check, X, PlayCircle } from 'lucide-react';
 import axios from 'axios';
 import styles from './Settings.module.css';
 
@@ -28,6 +29,7 @@ function validatePassword(password) {
 function Settings() {
   const { user } = useAuth();
   const { success, error: showError } = useToast();
+  const { resetTutorial } = useTutorial();
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -246,6 +248,29 @@ function Settings() {
             <p className={styles.userNote}>
               Contact your system administrator to update account details.
             </p>
+          </div>
+        </div>
+
+        {/* Help & Tutorial Card */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h2>📚 Help & Tutorial</h2>
+          </div>
+          <div className={styles.cardContent}>
+            <p className={styles.tutorialDescription}>
+              Need a refresher on how to use Candiez? Replay the interactive tutorial to learn about all the features.
+            </p>
+            <button
+              type="button"
+              className={styles.tutorialButton}
+              onClick={() => {
+                resetTutorial();
+                success('Tutorial restarted! Starting from the beginning.');
+              }}
+            >
+              <PlayCircle size={18} />
+              Replay Tutorial
+            </button>
           </div>
         </div>
       </div>
