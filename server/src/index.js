@@ -83,7 +83,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     version: '0.0.1',
-    clientUrl: process.env.CLIENT_URL || 'http://localhost:5173'
+    clientUrl: process.env.CLIENT_URL || 'https://candiez.shop'
   });
 });
 
