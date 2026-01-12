@@ -82,7 +82,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    version: '0.0.1'
+    version: '0.0.1',
+    clientUrl: process.env.CLIENT_URL || 'http://localhost:5173'
   });
 });
 
