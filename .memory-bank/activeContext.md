@@ -1,6 +1,6 @@
 # Active Context
 
-**Last Updated**: 2026-01-12 (Night Session)
+**Last Updated**: 2026-01-12 (Late Night Session)
 **Project**: Candiez-CA
 
 ## Current Focus
@@ -13,6 +13,7 @@
 - [x] Professional HTML email templates (verification + welcome)
 - [x] Resend API configuration (Railway env var + dotenv fix)
 - [x] Password reset flow (forgot-password, reset-password pages)
+- [x] Vitest test framework (client + server)
 
 ## Active Features
 <!-- Features currently in development -->
@@ -25,6 +26,7 @@
 - AnimatedLogo component - Production Ready
 - Professional email templates - Production Ready
 - Password reset flow - Production Ready
+- Test framework (Vitest) - Configured
 
 ## Known Blockers
 <!-- Issues preventing progress -->
@@ -33,10 +35,10 @@
 
 ## Next Session Priorities
 <!-- What to tackle next time -->
-1. Add test framework (Jest/Vitest)
-2. Set up CI/CD pipeline
-3. Add monitoring/logging
-4. Customer onboarding and training docs
+1. Set up CI/CD pipeline (GitHub Actions)
+2. Add monitoring/logging
+3. Customer onboarding and training docs
+4. Expand test coverage
 
 ## Quick Notes
 <!-- Temporary notes and reminders -->
@@ -47,13 +49,14 @@
 - Production Frontend: https://candiez.shop
 - Production Backend: https://candiez-ca-production.up.railway.app
 - GitHub Repo: https://github.com/PRSMTECH/Candiez-CA
-- Vercel Project: `client` (single consolidated project)
+- Vercel Project: `candiezca` (vercel.com/prsmtechbuilds/candiezca)
 - Railway Project Token: d5520c0b-ae7b-44bf-acba-92a3aab58457
 - Logo URLs (Supabase):
   - Primary: https://hhdmovjjvlfkspqrzsjz.supabase.co/storage/v1/object/public/public-media/candiez/images/logos/official-logo.png
   - Secondary: https://hhdmovjjvlfkspqrzsjz.supabase.co/storage/v1/object/public/public-media/candiez/images/logos/Candiez2-logo.png
-- Email preview file: server/test-email-preview.html
 - CLIENT_URL defaults to https://candiez.shop (production)
+- Test commands: `npm run test:run` (client or server)
+- Total tests: 27 (16 client + 11 server)
 
 ---
 **Usage**: Update at end of each session with current status

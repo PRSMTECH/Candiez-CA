@@ -274,4 +274,31 @@
 - All email links point to production by default
 
 ---
+
+## 2026-01-12 - Vitest Test Framework Selection
+
+**Context**: Project needed automated testing for quality assurance
+
+**Decision**: Use Vitest for both client and server with environment-specific configurations
+
+**Rationale**:
+- Vitest integrates seamlessly with Vite (already used for client)
+- Same test runner for both client and server ensures consistency
+- Fast execution with native ESM support
+- Built-in coverage reporting
+- Compatible with Jest API (familiar patterns)
+
+**Alternatives Considered**:
+- Jest (slower, requires more configuration with ESM)
+- Mocha + Chai (more setup, less integrated)
+- Testing Library only (doesn't include test runner)
+
+**Impact**:
+- Client: vitest.config.js with jsdom environment
+- Server: vitest.config.js with node environment
+- Test commands: npm test (watch), npm run test:run (single), npm run test:coverage
+- Example tests: formatters.test.js (16 tests), auth.test.js (11 tests)
+- Total: 27 tests passing
+
+---
 **Usage**: Add entry whenever making significant technical decisions

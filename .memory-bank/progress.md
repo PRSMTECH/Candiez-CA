@@ -4,7 +4,37 @@
 **Current Sprint**: Sprint 1
 **Sprint Goal**: Complete core CRM and inventory functionality
 
-## Latest Session (2026-01-12 Night)
+## Latest Session (2026-01-12 Late Night)
+
+### Deployment
+- **URL**: https://candiez.shop (production)
+- **Backend**: https://candiez-ca-production.up.railway.app
+- **Branch**: master
+- **Commit**: e0dcdd3
+- **Changes**: Vitest test framework setup
+
+### Completed This Session
+- [x] Added Vitest to client (jsdom environment for React testing)
+- [x] Added Vitest to server (node environment)
+- [x] Created test setup file with browser API mocks
+- [x] Added formatters utility with 5 functions (currency, date, phone, loyalty)
+- [x] Created formatters.test.js with 16 test cases
+- [x] Extracted auth middleware to separate file (server/src/middleware/auth.js)
+- [x] Created auth.test.js with 11 test cases
+- [x] Fixed timezone issue in date formatting tests
+- [x] Updated CLAUDE.md with testing documentation
+- [x] Added tmpclaude-* to .gitignore
+- [x] Verified all 27 tests pass (16 client + 11 server)
+
+### Next Up
+- [ ] Set up CI/CD pipeline (GitHub Actions)
+- [ ] Add monitoring/logging
+- [ ] Customer onboarding and training docs
+- [ ] Expand test coverage
+
+---
+
+## Earlier Session (2026-01-12 Night)
 
 ### Deployment
 - **URL**: https://candiez.shop (production)
@@ -24,12 +54,6 @@
 - [x] Fixed CLIENT_URL to default to production URL
 - [x] Tested password reset flow end-to-end
 - [x] All email templates include logo images from Supabase
-
-### Next Up
-- [ ] Add test framework (Jest/Vitest)
-- [ ] Set up CI/CD pipeline
-- [ ] Add monitoring/logging
-- [ ] Customer onboarding and training docs
 
 ---
 
@@ -126,10 +150,11 @@
 - [x] Loyalty program
 - [x] Sign-up with email verification
 - [x] Password reset flow
+- [x] Test framework (Vitest)
 
 **Deferred**:
-- [ ] Test framework setup
 - [ ] CI/CD pipeline
+- [ ] Monitoring/logging
 
 ---
 **Usage**: Update at end of each session with progress made
