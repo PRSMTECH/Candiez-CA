@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import AnimatedLogo from '../components/AnimatedLogo';
 import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import styles from './Login.module.css';
 
@@ -59,10 +60,12 @@ function Login() {
       <div className={styles.loginCard}>
         {/* Logo and Branding */}
         <div className={styles.brandSection}>
-          <div className={styles.logo}>
-            <span className={styles.logoIcon}>🍬</span>
-            <h1 className={styles.logoText}>Candiez</h1>
-          </div>
+          <AnimatedLogo
+            size="xlarge"
+            showText={false}
+            animationInterval={4000}
+            className={styles.logo}
+          />
           <p className={styles.tagline}>Dispensary CRM & Inventory</p>
         </div>
 

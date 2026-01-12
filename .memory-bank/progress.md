@@ -4,7 +4,34 @@
 **Current Sprint**: Sprint 1
 **Sprint Goal**: Complete core CRM and inventory functionality
 
-## Latest Session (2026-01-10)
+## Latest Session (2026-01-12)
+
+### Deployment
+- **URL**: https://candiez.shop (production)
+- **Preview**: https://client-64cmupyqp-prsmtechbuilds.vercel.app
+- **Branch**: master
+- **Commit**: a4ff0a2
+- **Changes**: Sign-up system with email verification and referral tracking
+
+### Completed
+- [x] Sign-up page with form validation
+- [x] Email verification flow (Resend API with dev fallback)
+- [x] Referral code system (pyramid-style tracking)
+- [x] URL parameter support for referral codes (?ref=CODE)
+- [x] Database schema updates (referral_tracking, referral_rewards tables)
+- [x] Demo users with referral codes (ADUS0001, MAUS0002, BUTE0003)
+- [x] Vite proxy configuration fixed
+- [x] Deployed to Vercel production
+- [x] Vercel project consolidation (merged client + candiez-ca)
+- [x] Connected GitHub auto-deploy to PRSMTECH/Candiez-CA
+- [x] Domain candiez.shop reassigned to consolidated project
+
+### Next Up
+- [ ] Add test framework (Jest/Vitest)
+- [ ] Set up CI/CD pipeline
+- [ ] Add monitoring/logging
+
+## Session (2026-01-10)
 
 ### Completed
 - [x] Project cleanup and organization (38 migration scripts organized)
@@ -16,14 +43,6 @@
 - [x] Configured Vercel rewrites to proxy /api to Railway
 - [x] End-to-end login tested for all 3 user roles
 - [x] Memory Bank saved
-
-### In Progress
-- [ ] Customer onboarding
-
-### Next Up
-- [ ] Add test framework (Jest/Vitest)
-- [ ] Set up CI/CD pipeline
-- [ ] Add monitoring/logging
 
 ## Session (2026-01-09)
 

@@ -1,0 +1,332 @@
+/* Animated Logo Component - Candiez Theme */
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  user-select: none;
+}
+
+/* Logo Wrapper - Contains the animated layers */
+.logoWrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(181, 126, 220, 0.1) 0%,
+    rgba(147, 112, 219, 0.1) 100%
+  );
+}
+
+/* Size Variants */
+.sizeSmall .logoWrapper {
+  width: 32px;
+  height: 32px;
+}
+
+.sizeMedium .logoWrapper {
+  width: 48px;
+  height: 48px;
+}
+
+.sizeLarge .logoWrapper {
+  width: 64px;
+  height: 64px;
+}
+
+.sizeXLarge .logoWrapper {
+  width: 140px;
+  height: 140px;
+  animation: float 3s ease-in-out infinite, breathe 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(181, 126, 220, 0.3),
+                0 0 40px rgba(181, 126, 220, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(181, 126, 220, 0.5),
+                0 0 60px rgba(181, 126, 220, 0.2),
+                0 0 80px rgba(181, 126, 220, 0.1);
+  }
+}
+
+/* Logo Layers - Stacked for crossfade */
+.logoLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  backface-visibility: hidden;
+}
+
+.logoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+/* Active/Inactive States */
+.logoLayer.active {
+  opacity: 1;
+  transform: scale(1) rotateY(0deg);
+  filter: none;
+}
+
+.logoLayer.inactive {
+  opacity: 0;
+  transform: scale(0.9) rotateY(90deg);
+  filter: blur(4px);
+}
+
+/* Animating State - Adds extra flair during transition */
+.logoWrapper.animating .logoLayer.active {
+  animation: pulseGlow 0.6s ease-out;
+}
+
+@keyframes pulseGlow {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3) drop-shadow(0 0 12px rgba(181, 126, 220, 0.8));
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+/* Shimmer Effect - Sweeps across on transition */
+.shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+}
+
+.logoWrapper.animating .shimmer {
+  animation: shimmerSweep 0.8s ease-out;
+}
+
+@keyframes shimmerSweep {
+  0% {
+    left: -100%;
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* Glow Effect - Subtle ambient glow */
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(181, 126, 220, 0.3) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(8px);
+}
+
+.logoWrapper.animating .glow {
+  animation: glowPulse 0.6s ease-out;
+}
+
+@keyframes glowPulse {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Logo Text */
+.logoText {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 50%,
+    var(--color-primary) 100%
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 4s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Size-specific text scaling */
+.sizeSmall .logoText {
+  font-size: 1rem;
+}
+
+.sizeMedium .logoText {
+  font-size: 1.25rem;
+}
+
+.sizeLarge .logoText {
+  font-size: 1.5rem;
+}
+
+.sizeXLarge .logoText {
+  font-size: 2rem;
+}
+
+/* Hover Effect */
+.logoWrapper:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.logoWrapper:hover .glow {
+  opacity: 0.5;
+  animation: none;
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .logoWrapper {
+  background: linear-gradient(
+    135deg,
+    rgba(181, 126, 220, 0.15) 0%,
+    rgba(147, 112, 219, 0.15) 100%
+  );
+}
+
+[data-theme="dark"] .shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+}
+
+[data-theme="dark"] .glow {
+  background: radial-gradient(
+    circle,
+    rgba(181, 126, 220, 0.4) 0%,
+    transparent 70%
+  );
+}
+
+[data-theme="dark"] .logoText {
+  background: linear-gradient(
+    135deg,
+    #d4a5eb 0%,
+    var(--color-primary) 50%,
+    #d4a5eb 100%
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: gradientShift 4s ease infinite;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .sizeXLarge .logoWrapper {
+    width: 100px;
+    height: 100px;
+  }
+
+  .sizeXLarge .logoText {
+    font-size: 1.5rem;
+  }
+}
+
+/* Reduced Motion - Respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  .logoLayer {
+    transition: opacity 0.3s ease;
+  }
+
+  .logoLayer.inactive {
+    transform: scale(1) rotateY(0deg);
+    filter: none;
+  }
+
+  .shimmer,
+  .glow {
+    display: none;
+  }
+
+  .logoText {
+    animation: none;
+    background: var(--color-primary);
+    -webkit-text-fill-color: var(--color-primary);
+  }
+
+  .logoWrapper {
+    animation: none !important;
+    box-shadow: 0 0 20px rgba(181, 126, 220, 0.3);
+  }
+
+  .logoWrapper:hover {
+    transform: none;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      filter: none;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import AnimatedLogo from '../components/AnimatedLogo';
 import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle, ArrowLeft, Gift } from 'lucide-react';
 import styles from './Signup.module.css';
 
@@ -130,10 +131,12 @@ function Signup() {
       <div className={styles.signupContainer}>
         <div className={styles.signupCard}>
           <div className={styles.brandSection}>
-            <div className={styles.logo}>
-              <span className={styles.logoIcon}>🍬</span>
-              <h1 className={styles.logoText}>Candiez</h1>
-            </div>
+            <AnimatedLogo
+              size="large"
+              showText={false}
+              animationInterval={4000}
+              className={styles.logo}
+            />
             <p className={styles.tagline}>Dispensary CRM & Inventory</p>
           </div>
 
@@ -177,10 +180,12 @@ function Signup() {
       <div className={styles.signupCard}>
         {/* Logo and Branding */}
         <div className={styles.brandSection}>
-          <div className={styles.logo}>
-            <span className={styles.logoIcon}>🍬</span>
-            <h1 className={styles.logoText}>Candiez</h1>
-          </div>
+          <AnimatedLogo
+            size="large"
+            showText={false}
+            animationInterval={4000}
+            className={styles.logo}
+          />
           <p className={styles.tagline}>Dispensary CRM & Inventory</p>
         </div>
 

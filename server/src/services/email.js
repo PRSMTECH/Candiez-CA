@@ -5,6 +5,10 @@ import crypto from 'crypto';
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Candiez Dispensary <noreply@candiez.shop>';
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
+// Logo URLs from Supabase storage
+const LOGO_PRIMARY = 'https://hhdmovjjvlfkspqrzsjz.supabase.co/storage/v1/object/public/public-media/candiez/images/logos/official-logo.png';
+const LOGO_SECONDARY = 'https://hhdmovjjvlfkspqrzsjz.supabase.co/storage/v1/object/public/public-media/candiez/images/logos/Candiez2-logo.png';
+
 // Check if email is enabled (API key present)
 const EMAIL_ENABLED = !!process.env.RESEND_API_KEY;
 
@@ -53,62 +57,111 @@ export const sendVerificationEmail = async (userEmail, firstName, verificationTo
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Verify Your Account</title>
+          <title>Verify Your Candiez Account</title>
+          <!--[if mso]>
+          <style type="text/css">
+            table { border-collapse: collapse; }
+            .button { padding: 16px 40px !important; }
+          </style>
+          <![endif]-->
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f0f7;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f0f7; padding: 40px 20px;">
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1225; -webkit-font-smoothing: antialiased;">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #1a1225; padding: 40px 20px;">
             <tr>
               <td align="center">
-                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(123, 74, 158, 0.15); overflow: hidden;">
-                  <!-- Header -->
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; background-color: #2d2438; border-radius: 20px; box-shadow: 0 8px 40px rgba(181, 126, 220, 0.25); overflow: hidden; border: 1px solid rgba(181, 126, 220, 0.2);">
+
+                  <!-- Header with Logo -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #9b59b6 0%, #7b4a9e 100%); padding: 40px 30px; text-align: center;">
-                      <div style="font-size: 48px; margin-bottom: 10px;">🍬</div>
-                      <h1 style="color: #ffffff; font-size: 32px; margin: 0; font-weight: 700; letter-spacing: -0.5px;">Candiez</h1>
-                      <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 8px 0 0; letter-spacing: 1px;">DISPENSARY CRM & INVENTORY</p>
+                    <td style="background: linear-gradient(135deg, #3d2952 0%, #2d1f3d 50%, #1a1225 100%); padding: 50px 30px; text-align: center;">
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                        <tr>
+                          <td align="center">
+                            <!-- Logo Container with Glow Effect -->
+                            <div style="display: inline-block; padding: 15px; background: linear-gradient(135deg, rgba(181, 126, 220, 0.15) 0%, rgba(147, 112, 219, 0.1) 100%); border-radius: 20px; box-shadow: 0 0 30px rgba(181, 126, 220, 0.3), 0 0 60px rgba(181, 126, 220, 0.15);">
+                              <img src="${LOGO_PRIMARY}" alt="Candiez Logo" width="100" height="100" style="display: block; border-radius: 12px;" />
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" style="padding-top: 20px;">
+                            <p style="color: rgba(212, 165, 235, 0.9); font-size: 13px; margin: 0; letter-spacing: 3px; text-transform: uppercase; font-weight: 500;">Dispensary CRM & Inventory</p>
+                          </td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
 
                   <!-- Content -->
                   <tr>
-                    <td style="padding: 40px 30px;">
-                      <h2 style="color: #333; font-size: 24px; margin: 0 0 20px; font-weight: 600;">Welcome, ${firstName}! 👋</h2>
-                      <p style="color: #666; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
-                        Thank you for creating an account with Candiez. To complete your registration and access your account, please verify your email address by clicking the button below.
+                    <td style="padding: 45px 40px;">
+                      <h2 style="color: #ffffff; font-size: 26px; margin: 0 0 8px; font-weight: 600; letter-spacing: -0.5px;">Welcome, ${firstName}!</h2>
+                      <p style="color: #b57edc; font-size: 15px; margin: 0 0 25px; font-weight: 500;">Your sweet journey begins here</p>
+
+                      <p style="color: #a89bb0; font-size: 16px; line-height: 1.7; margin: 0 0 30px;">
+                        Thank you for creating an account with Candiez. To complete your registration and unlock all features, please verify your email address.
                       </p>
 
                       <!-- CTA Button -->
-                      <table width="100%" cellpadding="0" cellspacing="0">
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                         <tr>
-                          <td align="center" style="padding: 10px 0 30px;">
-                            <a href="${verificationUrl}" style="display: inline-block; background: linear-gradient(135deg, #9b59b6 0%, #7b4a9e 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(155, 89, 182, 0.4);">
-                              ✅ Verify My Email
+                          <td align="center" style="padding: 15px 0 35px;">
+                            <a href="${verificationUrl}" class="button" style="display: inline-block; background: linear-gradient(135deg, #b57edc 0%, #9370db 50%, #8a5fd3 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 6px 25px rgba(181, 126, 220, 0.45), 0 0 40px rgba(181, 126, 220, 0.2); letter-spacing: 0.5px;">
+                              Verify My Email
                             </a>
                           </td>
                         </tr>
                       </table>
 
-                      <p style="color: #999; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
-                        If the button doesn't work, copy and paste this link into your browser:
-                      </p>
-                      <p style="color: #9b59b6; font-size: 14px; word-break: break-all; margin: 0 0 25px; padding: 15px; background: #f8f5fa; border-radius: 8px;">
-                        ${verificationUrl}
-                      </p>
-
-                      <div style="border-top: 1px solid #eee; padding-top: 25px; margin-top: 25px;">
-                        <p style="color: #999; font-size: 13px; line-height: 1.6; margin: 0;">
-                          ⏰ This verification link expires in <strong>24 hours</strong>.<br>
-                          If you didn't create an account, you can safely ignore this email.
+                      <!-- Alternative Link -->
+                      <div style="background: rgba(181, 126, 220, 0.08); border-radius: 12px; padding: 20px; border: 1px solid rgba(181, 126, 220, 0.15);">
+                        <p style="color: #8a7a96; font-size: 13px; line-height: 1.5; margin: 0 0 12px;">
+                          If the button doesn't work, copy and paste this link:
                         </p>
+                        <p style="color: #b57edc; font-size: 13px; word-break: break-all; margin: 0; font-family: monospace;">
+                          ${verificationUrl}
+                        </p>
+                      </div>
+
+                      <!-- Expiry Notice -->
+                      <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(181, 126, 220, 0.15);">
+                        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                          <tr>
+                            <td width="24" valign="top" style="padding-right: 12px;">
+                              <div style="width: 24px; height: 24px; background: rgba(181, 126, 220, 0.15); border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px;">⏰</div>
+                            </td>
+                            <td>
+                              <p style="color: #8a7a96; font-size: 13px; line-height: 1.5; margin: 0;">
+                                This verification link expires in <strong style="color: #b57edc;">24 hours</strong>.<br>
+                                If you didn't create an account, you can safely ignore this email.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
                       </div>
                     </td>
                   </tr>
 
                   <!-- Footer -->
                   <tr>
-                    <td style="background: #f8f5fa; padding: 25px 30px; text-align: center; border-top: 1px solid #ede7f2;">
-                      <p style="color: #9b59b6; font-size: 14px; margin: 0 0 5px; font-weight: 600;">Candiez Dispensary</p>
-                      <p style="color: #999; font-size: 12px; margin: 0;">California Licensed Dispensary Management System</p>
+                    <td style="background: linear-gradient(135deg, rgba(45, 36, 56, 0.8) 0%, rgba(26, 18, 37, 0.9) 100%); padding: 30px; text-align: center; border-top: 1px solid rgba(181, 126, 220, 0.1);">
+                      <img src="${LOGO_SECONDARY}" alt="Candiez" width="40" height="40" style="display: inline-block; border-radius: 8px; margin-bottom: 12px;" />
+                      <p style="color: #b57edc; font-size: 14px; margin: 0 0 5px; font-weight: 600;">Candiez Dispensary</p>
+                      <p style="color: #6b5f78; font-size: 12px; margin: 0;">California Licensed Dispensary Management System</p>
+                      <p style="color: #4a4255; font-size: 11px; margin: 15px 0 0;">
+                        <a href="${CLIENT_URL}" style="color: #8a7a96; text-decoration: none;">candiez.shop</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Legal Footer -->
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px;">
+                  <tr>
+                    <td style="padding: 25px 30px; text-align: center;">
+                      <p style="color: #4a4255; font-size: 11px; line-height: 1.5; margin: 0;">
+                        This email was sent to ${userEmail}. If you have questions, contact us at support@candiez.shop
+                      </p>
                     </td>
                   </tr>
                 </table>
@@ -172,63 +225,152 @@ export const sendWelcomeEmail = async (userEmail, firstName) => {
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Welcome to Candiez</title>
+          <!--[if mso]>
+          <style type="text/css">
+            table { border-collapse: collapse; }
+            .button { padding: 16px 40px !important; }
+          </style>
+          <![endif]-->
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f0f7;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f0f7; padding: 40px 20px;">
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1225; -webkit-font-smoothing: antialiased;">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #1a1225; padding: 40px 20px;">
             <tr>
               <td align="center">
-                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(123, 74, 158, 0.15); overflow: hidden;">
-                  <!-- Header -->
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; background-color: #2d2438; border-radius: 20px; box-shadow: 0 8px 40px rgba(181, 126, 220, 0.25); overflow: hidden; border: 1px solid rgba(181, 126, 220, 0.2);">
+
+                  <!-- Header with Logo -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #9b59b6 0%, #7b4a9e 100%); padding: 40px 30px; text-align: center;">
-                      <div style="font-size: 48px; margin-bottom: 10px;">🍬</div>
-                      <h1 style="color: #ffffff; font-size: 32px; margin: 0; font-weight: 700; letter-spacing: -0.5px;">Candiez</h1>
-                      <p style="color: rgba(255,255,255,0.9); font-size: 14px; margin: 8px 0 0; letter-spacing: 1px;">DISPENSARY CRM & INVENTORY</p>
-                    </td>
-                  </tr>
-
-                  <!-- Content -->
-                  <tr>
-                    <td style="padding: 40px 30px;">
-                      <div style="text-align: center; margin-bottom: 30px;">
-                        <div style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px 30px; border-radius: 50px; font-size: 18px; font-weight: 600;">
-                          ✅ Email Verified Successfully!
-                        </div>
-                      </div>
-
-                      <h2 style="color: #333; font-size: 24px; margin: 0 0 20px; font-weight: 600;">Welcome aboard, ${firstName}! 🎉</h2>
-                      <p style="color: #666; font-size: 16px; line-height: 1.6; margin: 0 0 25px;">
-                        Your email has been verified and your Candiez account is now active. You're all set to start using our dispensary management system!
-                      </p>
-
-                      <div style="background: #f8f5fa; border-radius: 12px; padding: 25px; margin-bottom: 25px;">
-                        <h3 style="color: #7b4a9e; font-size: 18px; margin: 0 0 15px;">🚀 Getting Started</h3>
-                        <ul style="color: #666; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
-                          <li>Explore the <strong>Dashboard</strong> for an overview</li>
-                          <li>Use the <strong>POS</strong> for quick transactions</li>
-                          <li>Manage <strong>Customers</strong> and loyalty programs</li>
-                          <li>Track your <strong>Inventory</strong> in real-time</li>
-                        </ul>
-                      </div>
-
-                      <!-- CTA Button -->
-                      <table width="100%" cellpadding="0" cellspacing="0">
+                    <td style="background: linear-gradient(135deg, #3d2952 0%, #2d1f3d 50%, #1a1225 100%); padding: 50px 30px; text-align: center;">
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                         <tr>
-                          <td align="center" style="padding: 10px 0 20px;">
-                            <a href="${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, #9b59b6 0%, #7b4a9e 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(155, 89, 182, 0.4);">
-                              🔐 Sign In to Your Account
-                            </a>
+                          <td align="center">
+                            <!-- Logo Container with Glow Effect -->
+                            <div style="display: inline-block; padding: 15px; background: linear-gradient(135deg, rgba(181, 126, 220, 0.15) 0%, rgba(147, 112, 219, 0.1) 100%); border-radius: 20px; box-shadow: 0 0 30px rgba(181, 126, 220, 0.3), 0 0 60px rgba(181, 126, 220, 0.15);">
+                              <img src="${LOGO_PRIMARY}" alt="Candiez Logo" width="100" height="100" style="display: block; border-radius: 12px;" />
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" style="padding-top: 20px;">
+                            <p style="color: rgba(212, 165, 235, 0.9); font-size: 13px; margin: 0; letter-spacing: 3px; text-transform: uppercase; font-weight: 500;">Dispensary CRM & Inventory</p>
                           </td>
                         </tr>
                       </table>
                     </td>
                   </tr>
 
+                  <!-- Success Badge -->
+                  <tr>
+                    <td style="padding: 0 40px;">
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: -25px;">
+                        <tr>
+                          <td align="center">
+                            <div style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 14px 35px; border-radius: 50px; font-size: 15px; font-weight: 600; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);">
+                              ✓ Email Verified Successfully
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 35px 40px 45px;">
+                      <h2 style="color: #ffffff; font-size: 26px; margin: 0 0 8px; font-weight: 600; letter-spacing: -0.5px; text-align: center;">Welcome aboard, ${firstName}!</h2>
+                      <p style="color: #b57edc; font-size: 15px; margin: 0 0 25px; font-weight: 500; text-align: center;">Your account is now active</p>
+
+                      <p style="color: #a89bb0; font-size: 16px; line-height: 1.7; margin: 0 0 30px; text-align: center;">
+                        You're all set to start using our dispensary management system. Here's what you can do:
+                      </p>
+
+                      <!-- Features Grid -->
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom: 30px;">
+                        <tr>
+                          <td style="padding: 0 5px 10px;">
+                            <div style="background: rgba(181, 126, 220, 0.08); border-radius: 12px; padding: 20px; border: 1px solid rgba(181, 126, 220, 0.15);">
+                              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                                <tr>
+                                  <td width="50%" style="padding-right: 8px; vertical-align: top;">
+                                    <div style="background: rgba(181, 126, 220, 0.1); border-radius: 10px; padding: 16px; text-align: center; height: 80px;">
+                                      <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
+                                      <p style="color: #d4a5eb; font-size: 13px; margin: 0; font-weight: 600;">Dashboard</p>
+                                      <p style="color: #8a7a96; font-size: 11px; margin: 4px 0 0;">Business overview</p>
+                                    </div>
+                                  </td>
+                                  <td width="50%" style="padding-left: 8px; vertical-align: top;">
+                                    <div style="background: rgba(181, 126, 220, 0.1); border-radius: 10px; padding: 16px; text-align: center; height: 80px;">
+                                      <div style="font-size: 24px; margin-bottom: 8px;">💳</div>
+                                      <p style="color: #d4a5eb; font-size: 13px; margin: 0; font-weight: 600;">Point of Sale</p>
+                                      <p style="color: #8a7a96; font-size: 11px; margin: 4px 0 0;">Quick transactions</p>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td width="50%" style="padding: 10px 8px 0 0; vertical-align: top;">
+                                    <div style="background: rgba(181, 126, 220, 0.1); border-radius: 10px; padding: 16px; text-align: center; height: 80px;">
+                                      <div style="font-size: 24px; margin-bottom: 8px;">👥</div>
+                                      <p style="color: #d4a5eb; font-size: 13px; margin: 0; font-weight: 600;">Customers</p>
+                                      <p style="color: #8a7a96; font-size: 11px; margin: 4px 0 0;">Loyalty programs</p>
+                                    </div>
+                                  </td>
+                                  <td width="50%" style="padding: 10px 0 0 8px; vertical-align: top;">
+                                    <div style="background: rgba(181, 126, 220, 0.1); border-radius: 10px; padding: 16px; text-align: center; height: 80px;">
+                                      <div style="font-size: 24px; margin-bottom: 8px;">📦</div>
+                                      <p style="color: #d4a5eb; font-size: 13px; margin: 0; font-weight: 600;">Inventory</p>
+                                      <p style="color: #8a7a96; font-size: 11px; margin: 4px 0 0;">Real-time tracking</p>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- CTA Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                        <tr>
+                          <td align="center" style="padding: 5px 0 20px;">
+                            <a href="${loginUrl}" class="button" style="display: inline-block; background: linear-gradient(135deg, #b57edc 0%, #9370db 50%, #8a5fd3 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 6px 25px rgba(181, 126, 220, 0.45), 0 0 40px rgba(181, 126, 220, 0.2); letter-spacing: 0.5px;">
+                              Sign In to Your Account
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Referral Notice (if applicable) -->
+                      <div style="margin-top: 20px; padding: 18px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center;">
+                        <p style="color: #10b981; font-size: 14px; margin: 0; font-weight: 500;">
+                          🎁 Earn rewards by referring friends!
+                        </p>
+                        <p style="color: #8a7a96; font-size: 12px; margin: 8px 0 0;">
+                          Share your referral code and both of you earn bonus points.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+
                   <!-- Footer -->
                   <tr>
-                    <td style="background: #f8f5fa; padding: 25px 30px; text-align: center; border-top: 1px solid #ede7f2;">
-                      <p style="color: #9b59b6; font-size: 14px; margin: 0 0 5px; font-weight: 600;">Candiez Dispensary</p>
-                      <p style="color: #999; font-size: 12px; margin: 0;">California Licensed Dispensary Management System</p>
+                    <td style="background: linear-gradient(135deg, rgba(45, 36, 56, 0.8) 0%, rgba(26, 18, 37, 0.9) 100%); padding: 30px; text-align: center; border-top: 1px solid rgba(181, 126, 220, 0.1);">
+                      <img src="${LOGO_SECONDARY}" alt="Candiez" width="40" height="40" style="display: inline-block; border-radius: 8px; margin-bottom: 12px;" />
+                      <p style="color: #b57edc; font-size: 14px; margin: 0 0 5px; font-weight: 600;">Candiez Dispensary</p>
+                      <p style="color: #6b5f78; font-size: 12px; margin: 0;">California Licensed Dispensary Management System</p>
+                      <p style="color: #4a4255; font-size: 11px; margin: 15px 0 0;">
+                        <a href="${CLIENT_URL}" style="color: #8a7a96; text-decoration: none;">candiez.shop</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Legal Footer -->
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px;">
+                  <tr>
+                    <td style="padding: 25px 30px; text-align: center;">
+                      <p style="color: #4a4255; font-size: 11px; line-height: 1.5; margin: 0;">
+                        This email was sent to ${userEmail}. If you have questions, contact us at support@candiez.shop
+                      </p>
                     </td>
                   </tr>
                 </table>

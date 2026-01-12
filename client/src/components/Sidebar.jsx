@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import AnimatedLogo from './AnimatedLogo';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -106,8 +107,11 @@ function Sidebar({ collapsed, onToggle }) {
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
       {/* Logo Section */}
       <div className={styles.logoSection}>
-        <span className={styles.logoIcon}>🍬</span>
-        {!collapsed && <span className={styles.logoText}>Candiez</span>}
+        <AnimatedLogo
+          size={collapsed ? 'small' : 'medium'}
+          showText={false}
+          animationInterval={5000}
+        />
       </div>
 
       {/* Toggle Button */}

@@ -1,7 +1,7 @@
 # System Patterns & Conventions
 
 **Project**: Candiez-CA
-**Last Updated**: 2026-01-09
+**Last Updated**: 2026-01-12
 
 ## Code Organization
 
@@ -185,12 +185,34 @@ import styles from './Component.module.css'
 
 ## Authentication Flow
 
+### Login Flow
 1. User submits login form
 2. Server validates credentials, returns JWT
 3. Frontend stores token in localStorage
 4. AuthContext provides token to components
 5. Protected routes check auth state
 6. API requests include Bearer token
+
+### Sign-Up Flow (New)
+1. User fills signup form (with optional referral code)
+2. Server validates input with Zod
+3. Creates user with `status: 'pending'`, `email_verified: 0`
+4. Generates unique referral code (format: XXXX0001)
+5. Tracks referral if referral code provided
+6. Sends verification email (or logs to console in dev)
+7. User clicks verification link
+8. Server verifies token, sets `email_verified: 1`
+9. User can now log in
+
+### Referral Code Pattern
+```javascript
+// Generate unique referral code
+const generateReferralCode = (firstName, lastName, id) => {
+  const prefix = (firstName[0] + firstName[1] + lastName[0] + lastName[1]).toUpperCase();
+  return `${prefix}${String(id).padStart(4, '0')}`;
+};
+// Example: ADUS0001, MAUS0002, BUTE0003
+```
 
 ## Roles & Permissions
 

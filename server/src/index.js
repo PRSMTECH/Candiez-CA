@@ -1,15 +1,15 @@
 // Fixed datetime quotes for SQLite compatibility
+// Load environment variables FIRST (must be before any imports that use env vars)
+import 'dotenv/config';
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import { authenticate, authorize, generateToken } from './middleware/auth.js';
 import db, { initializeDatabase } from './db/database.js';
 import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, verifyEmailConfig } from './services/email.js';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

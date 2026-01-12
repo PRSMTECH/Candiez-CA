@@ -159,4 +159,74 @@
 - Database directory auto-created on startup
 
 ---
+
+## 2026-01-12 - Sign-Up System with Email Verification
+
+**Context**: Need user self-registration with email verification for security
+
+**Decision**: Implement sign-up flow with Resend API for transactional emails, graceful dev fallback
+
+**Rationale**:
+- Resend API provides reliable transactional email delivery
+- Dev mode fallback logs emails to console when API key missing
+- Email verification prevents fake accounts
+- Token-based verification with 24-hour expiry
+
+**Alternatives Considered**:
+- SendGrid (more complex setup)
+- Nodemailer with SMTP (less reliable)
+- No email verification (security risk)
+
+**Impact**:
+- New signup page at /signup
+- Email verification page at /verify-email
+- Database columns: email_verified, email_verification_token, email_verification_expires
+- Environment variable: RESEND_API_KEY (optional for dev)
+
+---
+
+## 2026-01-12 - Pyramid-Style Referral System
+
+**Context**: Josh Tenove requested referral tracking per meeting notes
+
+**Decision**: Implement referral codes with tracking tables for pyramid-style analytics
+
+**Rationale**:
+- Every user gets unique referral code (format: XXXX0001)
+- Signup form accepts referral codes
+- URL parameter support (?ref=CODE)
+- referral_tracking table for audit trail
+- referral_rewards table for future reward calculations
+
+**Alternatives Considered**:
+- Simple referral count (no tracking detail)
+- Third-party referral service (added cost/complexity)
+- No referral system (missed growth opportunity)
+
+**Impact**:
+- Demo users have codes: ADUS0001, MAUS0002, BUTE0003
+- New tables: referral_tracking, referral_rewards
+- User columns: referral_code, referred_by_user_id, referred_by_code
+
+---
+
+## 2026-01-12 - Vercel Project Consolidation
+
+**Context**: Two Vercel projects existed (client + candiez-ca) after repo migration
+
+**Decision**: Consolidate to single `client` project with GitHub auto-deploy
+
+**Rationale**:
+- Repo moved from MrJPTech to PRSMTECH org
+- Old candiez-ca project still connected to old GitHub location
+- Single project simplifies deployment and monitoring
+- GitHub integration enables auto-deploy on push
+
+**Impact**:
+- Single Vercel project: `client`
+- Domain: candiez.shop → client project
+- GitHub: Connected to PRSMTECH/Candiez-CA
+- Auto-deploy: Enabled on push to master
+
+---
 **Usage**: Add entry whenever making significant technical decisions
