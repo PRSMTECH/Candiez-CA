@@ -63,6 +63,18 @@ export function initializeDatabase() {
     // Column already exists, ignore error
   }
 
+  // Migration: Add password reset columns
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN password_reset_token TEXT`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN password_reset_expires TEXT`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+
   // Migration: Add referral system columns
   try {
     db.exec(`ALTER TABLE users ADD COLUMN referral_code TEXT UNIQUE`);

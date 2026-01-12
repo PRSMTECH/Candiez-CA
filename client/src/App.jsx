@@ -15,6 +15,8 @@ import { antdMobileTheme } from './theme/antdMobileTheme';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import CustomerNew from './pages/CustomerNew';
@@ -49,6 +51,8 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
 
                     {/* Protected Routes with Layout (Sidebar) */}
                     <Route

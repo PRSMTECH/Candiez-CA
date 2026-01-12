@@ -410,4 +410,188 @@ Getting Started:
   }
 };
 
+// Generate password reset token
+export const generatePasswordResetToken = () => {
+  return crypto.randomBytes(32).toString('hex');
+};
+
+// Send password reset email
+export const sendPasswordResetEmail = async (userEmail, firstName, resetToken) => {
+  const resetUrl = `${CLIENT_URL}/reset-password?token=${resetToken}`;
+
+  // If email not configured, log to console and return success for testing
+  if (!EMAIL_ENABLED) {
+    console.log('\n🔐 ===== PASSWORD RESET EMAIL (DEV MODE) =====');
+    console.log(`To: ${userEmail}`);
+    console.log(`Subject: 🔐 Reset Your Candiez Password`);
+    console.log(`Reset URL: ${resetUrl}`);
+    console.log('==============================================\n');
+    return { success: true, messageId: 'dev-mode', devMode: true };
+  }
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject: '🔐 Reset Your Candiez Password',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Reset Your Candiez Password</title>
+          <!--[if mso]>
+          <style type="text/css">
+            table { border-collapse: collapse; }
+            .button { padding: 16px 40px !important; }
+          </style>
+          <![endif]-->
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1225; -webkit-font-smoothing: antialiased;">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color: #1a1225; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; background-color: #2d2438; border-radius: 20px; box-shadow: 0 8px 40px rgba(181, 126, 220, 0.25); overflow: hidden; border: 1px solid rgba(181, 126, 220, 0.2);">
+
+                  <!-- Header with Logo -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #3d2952 0%, #2d1f3d 50%, #1a1225 100%); padding: 50px 30px; text-align: center;">
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                        <tr>
+                          <td align="center">
+                            <!-- Logo Container with Glow Effect -->
+                            <div style="display: inline-block; padding: 15px; background: linear-gradient(135deg, rgba(181, 126, 220, 0.15) 0%, rgba(147, 112, 219, 0.1) 100%); border-radius: 20px; box-shadow: 0 0 30px rgba(181, 126, 220, 0.3), 0 0 60px rgba(181, 126, 220, 0.15);">
+                              <img src="${LOGO_PRIMARY}" alt="Candiez Logo" width="100" height="100" style="display: block; border-radius: 12px;" />
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" style="padding-top: 20px;">
+                            <p style="color: rgba(212, 165, 235, 0.9); font-size: 13px; margin: 0; letter-spacing: 3px; text-transform: uppercase; font-weight: 500;">Dispensary CRM & Inventory</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 45px 40px;">
+                      <h2 style="color: #ffffff; font-size: 26px; margin: 0 0 8px; font-weight: 600; letter-spacing: -0.5px;">Password Reset Request</h2>
+                      <p style="color: #b57edc; font-size: 15px; margin: 0 0 25px; font-weight: 500;">Hi ${firstName}, we received your request</p>
+
+                      <p style="color: #a89bb0; font-size: 16px; line-height: 1.7; margin: 0 0 30px;">
+                        We received a request to reset the password for your Candiez account. Click the button below to create a new password.
+                      </p>
+
+                      <!-- CTA Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                        <tr>
+                          <td align="center" style="padding: 15px 0 35px;">
+                            <a href="${resetUrl}" class="button" style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 12px; font-size: 16px; font-weight: 600; box-shadow: 0 6px 25px rgba(245, 158, 11, 0.45), 0 0 40px rgba(245, 158, 11, 0.2); letter-spacing: 0.5px;">
+                              Reset My Password
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Alternative Link -->
+                      <div style="background: rgba(181, 126, 220, 0.08); border-radius: 12px; padding: 20px; border: 1px solid rgba(181, 126, 220, 0.15);">
+                        <p style="color: #8a7a96; font-size: 13px; line-height: 1.5; margin: 0 0 12px;">
+                          If the button doesn't work, copy and paste this link:
+                        </p>
+                        <p style="color: #b57edc; font-size: 13px; word-break: break-all; margin: 0; font-family: monospace;">
+                          ${resetUrl}
+                        </p>
+                      </div>
+
+                      <!-- Expiry Notice -->
+                      <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(181, 126, 220, 0.15);">
+                        <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                          <tr>
+                            <td width="24" valign="top" style="padding-right: 12px;">
+                              <div style="width: 24px; height: 24px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; text-align: center; line-height: 24px; font-size: 12px;">⏰</div>
+                            </td>
+                            <td>
+                              <p style="color: #8a7a96; font-size: 13px; line-height: 1.5; margin: 0;">
+                                This password reset link expires in <strong style="color: #f59e0b;">1 hour</strong>.<br>
+                                If you didn't request a password reset, you can safely ignore this email.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+
+                      <!-- Security Notice -->
+                      <div style="margin-top: 25px; padding: 18px; background: rgba(239, 68, 68, 0.08); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.15);">
+                        <p style="color: #ef4444; font-size: 13px; margin: 0; font-weight: 500;">
+                          🔒 Security Tip
+                        </p>
+                        <p style="color: #8a7a96; font-size: 12px; margin: 8px 0 0;">
+                          Never share this link with anyone. Candiez staff will never ask for your password.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, rgba(45, 36, 56, 0.8) 0%, rgba(26, 18, 37, 0.9) 100%); padding: 30px; text-align: center; border-top: 1px solid rgba(181, 126, 220, 0.1);">
+                      <img src="${LOGO_SECONDARY}" alt="Candiez" width="40" height="40" style="display: inline-block; border-radius: 8px; margin-bottom: 12px;" />
+                      <p style="color: #b57edc; font-size: 14px; margin: 0 0 5px; font-weight: 600;">Candiez Dispensary</p>
+                      <p style="color: #6b5f78; font-size: 12px; margin: 0;">California Licensed Dispensary Management System</p>
+                      <p style="color: #4a4255; font-size: 11px; margin: 15px 0 0;">
+                        <a href="${CLIENT_URL}" style="color: #8a7a96; text-decoration: none;">candiez.shop</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Legal Footer -->
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px;">
+                  <tr>
+                    <td style="padding: 25px 30px; text-align: center;">
+                      <p style="color: #4a4255; font-size: 11px; line-height: 1.5; margin: 0;">
+                        This email was sent to ${userEmail}. If you have questions, contact us at support@candiez.shop
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+      text: `
+Password Reset Request
+
+Hi ${firstName},
+
+We received a request to reset your Candiez account password.
+
+Reset your password: ${resetUrl}
+
+This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
+
+Security Tip: Never share this link with anyone.
+
+- Candiez Dispensary Team
+      `
+    });
+
+    if (error) {
+      console.error('Resend error:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('Password reset email sent:', data?.id);
+    return { success: true, messageId: data?.id };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export default resend;

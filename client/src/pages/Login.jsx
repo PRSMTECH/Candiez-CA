@@ -133,9 +133,9 @@ function Login() {
               <input type="checkbox" />
               <span>Remember me</span>
             </label>
-            <a href="/forgot-password" className={styles.forgotPassword}>
+            <Link to="/forgot-password" className={styles.forgotPassword}>
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           {/* Submit Button */}

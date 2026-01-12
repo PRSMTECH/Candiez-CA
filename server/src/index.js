@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import { authenticate, authorize, generateToken } from './middleware/auth.js';
 import db, { initializeDatabase } from './db/database.js';
-import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, verifyEmailConfig } from './services/email.js';
+import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, verifyEmailConfig, generatePasswordResetToken, sendPasswordResetEmail } from './services/email.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -434,6 +434,198 @@ app.post('/api/auth/resend-verification', async (req, res) => {
     console.error('Resend verification error:', error);
     res.status(500).json({
       error: 'Request failed',
+      message: 'An error occurred. Please try again.'
+    });
+  }
+});
+
+// ==========================================
+// PASSWORD RESET ENDPOINTS
+// ==========================================
+
+// Request password reset (forgot password)
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Email is required'
+    });
+  }
+
+  // Find verified user with this email
+  const user = db.prepare(`
+    SELECT id, email, first_name
+    FROM users
+    WHERE email = ? AND email_verified = 1 AND status = 'active'
+  `).get(email.toLowerCase());
+
+  // Always return same response for security (don't reveal if email exists)
+  const genericResponse = {
+    message: 'If an account exists with this email, a password reset link has been sent.'
+  };
+
+  if (!user) {
+    return res.json(genericResponse);
+  }
+
+  try {
+    // Generate password reset token
+    const resetToken = generatePasswordResetToken();
+    const tokenExpires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+
+    // Store reset token in database
+    db.prepare(`
+      UPDATE users
+      SET password_reset_token = ?,
+          password_reset_expires = ?,
+          updated_at = datetime('now')
+      WHERE id = ?
+    `).run(resetToken, tokenExpires, user.id);
+
+    // Send password reset email
+    const emailResult = await sendPasswordResetEmail(user.email, user.first_name, resetToken);
+
+    if (!emailResult.success) {
+      console.error('Failed to send password reset email:', emailResult.error);
+    }
+
+    res.json({
+      ...genericResponse,
+      sent: emailResult.success
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      error: 'Request failed',
+      message: 'An error occurred. Please try again.'
+    });
+  }
+});
+
+// Verify password reset token (check if valid)
+app.get('/api/auth/reset-password/:token', (req, res) => {
+  const { token } = req.params;
+
+  if (!token) {
+    return res.status(400).json({
+      error: 'Invalid request',
+      message: 'Reset token is required'
+    });
+  }
+
+  // Find user with this reset token
+  const user = db.prepare(`
+    SELECT id, email, first_name, password_reset_expires
+    FROM users
+    WHERE password_reset_token = ?
+  `).get(token);
+
+  if (!user) {
+    return res.status(404).json({
+      valid: false,
+      error: 'Invalid token',
+      message: 'This password reset link is invalid or has already been used.'
+    });
+  }
+
+  // Check if token is expired
+  if (new Date(user.password_reset_expires) < new Date()) {
+    return res.status(410).json({
+      valid: false,
+      error: 'Token expired',
+      message: 'This password reset link has expired. Please request a new one.',
+      email: user.email
+    });
+  }
+
+  res.json({
+    valid: true,
+    email: user.email,
+    firstName: user.first_name
+  });
+});
+
+// Reset password with token
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Token and new password are required'
+    });
+  }
+
+  // Validate password strength
+  if (password.length < 8) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Password must be at least 8 characters long'
+    });
+  }
+
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Password must contain at least one letter and one number'
+    });
+  }
+
+  // Find user with this reset token
+  const user = db.prepare(`
+    SELECT id, email, first_name, password_reset_expires
+    FROM users
+    WHERE password_reset_token = ?
+  `).get(token);
+
+  if (!user) {
+    return res.status(404).json({
+      error: 'Invalid token',
+      message: 'This password reset link is invalid or has already been used.'
+    });
+  }
+
+  // Check if token is expired
+  if (new Date(user.password_reset_expires) < new Date()) {
+    return res.status(410).json({
+      error: 'Token expired',
+      message: 'This password reset link has expired. Please request a new one.'
+    });
+  }
+
+  try {
+    // Hash new password
+    const passwordHash = bcrypt.hashSync(password, 10);
+
+    // Update password and clear reset token
+    db.prepare(`
+      UPDATE users
+      SET password_hash = ?,
+          password_reset_token = NULL,
+          password_reset_expires = NULL,
+          updated_at = datetime('now')
+      WHERE id = ?
+    `).run(passwordHash, user.id);
+
+    // Log password reset
+    db.prepare(`
+      INSERT INTO activity_log (user_id, action, details)
+      VALUES (?, 'password_reset', 'Password reset completed')
+    `).run(user.id);
+
+    res.json({
+      success: true,
+      message: 'Password has been reset successfully. You can now sign in with your new password.'
+    });
+
+  } catch (error) {
+    console.error('Password reset error:', error);
+    res.status(500).json({
+      error: 'Reset failed',
       message: 'An error occurred. Please try again.'
     });
   }
