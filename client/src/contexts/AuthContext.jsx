@@ -78,6 +78,37 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const register = async ({ firstName, lastName, email, phone, password, referralCode }) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post('/api/auth/register', {
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+        referralCode
+      });
+
+      return {
+        success: true,
+        message: response.data.message,
+        emailSent: response.data.emailSent,
+        referralCode: response.data.referralCode,
+        referredBy: response.data.referredBy
+      };
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Registration failed. Please try again.';
+      const canResend = err.response?.data?.canResend || false;
+      setError(errorMessage);
+      return { success: false, error: errorMessage, canResend };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -85,6 +116,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     login,
     logout,
+    register,
     checkAuth,
     clearError: () => setError(null)
   };

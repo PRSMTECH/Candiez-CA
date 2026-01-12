@@ -30,14 +30,105 @@ export function initializeDatabase() {
       first_name TEXT NOT NULL,
       last_name TEXT NOT NULL,
       role TEXT NOT NULL CHECK (role IN ('admin', 'manager', 'budtender')),
-      status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+      status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'pending')),
       phone TEXT,
       avatar_url TEXT,
+      email_verified INTEGER DEFAULT 0,
+      email_verification_token TEXT,
+      email_verification_expires TEXT,
+      referral_code TEXT UNIQUE,
+      referred_by_user_id INTEGER,
+      referred_by_code TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now')),
-      last_login TEXT
+      last_login TEXT,
+      FOREIGN KEY (referred_by_user_id) REFERENCES users(id)
     )
   `);
+
+  // Migration: Add email verification columns if missing
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN email_verification_token TEXT`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN email_verification_expires TEXT`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+
+  // Migration: Add referral system columns
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN referral_code TEXT UNIQUE`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN referred_by_user_id INTEGER REFERENCES users(id)`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN referred_by_code TEXT`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+
+  // Referral tracking table (for pyramid-style tracking)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS referral_tracking (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      referrer_id INTEGER NOT NULL,
+      referred_id INTEGER NOT NULL,
+      referral_code TEXT NOT NULL,
+      level INTEGER DEFAULT 1,
+      status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (referrer_id) REFERENCES users(id),
+      FOREIGN KEY (referred_id) REFERENCES users(id)
+    )
+  `);
+
+  // Referral rewards table (track points/rewards earned from referrals)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS referral_rewards (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      referrer_id INTEGER NOT NULL,
+      referred_id INTEGER,
+      transaction_id INTEGER,
+      reward_type TEXT NOT NULL CHECK (reward_type IN ('signup_bonus', 'transaction_commission', 'tier_bonus')),
+      points_earned INTEGER DEFAULT 0,
+      amount REAL DEFAULT 0,
+      description TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (referrer_id) REFERENCES users(id),
+      FOREIGN KEY (referred_id) REFERENCES users(id),
+      FOREIGN KEY (transaction_id) REFERENCES transactions(id)
+    )
+  `);
+
+  // Create index for referral code lookup
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code)`);
+  } catch (e) {
+    // Index already exists or column doesn't exist yet
+  }
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_referral_tracking_referrer ON referral_tracking(referrer_id)`);
+  } catch (e) {
+    // Index already exists
+  }
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_referral_tracking_referred ON referral_tracking(referred_id)`);
+  } catch (e) {
+    // Index already exists
+  }
 
   // Customers table
   db.exec(`

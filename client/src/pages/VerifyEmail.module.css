@@ -1,0 +1,314 @@
+/* Verify Email Page Styles - Candiez Theme */
+
+.verifyContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-light) 0%,
+    var(--color-primary) 50%,
+    var(--color-primary-dark) 100%
+  );
+}
+
+.verifyCard {
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-card-light);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(123, 74, 158, 0.35);
+  overflow: hidden;
+}
+
+/* Brand Section */
+.brandSection {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  padding: 2rem;
+  text-align: center;
+  color: white;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.logoIcon {
+  font-size: 2.5rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.logoText {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tagline {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  letter-spacing: 0.05em;
+}
+
+/* Content Section */
+.contentSection {
+  padding: 3rem 2rem;
+}
+
+.statusContent {
+  text-align: center;
+}
+
+.iconWrapper {
+  margin-bottom: 1.5rem;
+  color: var(--color-primary);
+}
+
+.successIcon {
+  color: #10B981;
+}
+
+.errorIcon {
+  color: #EF4444;
+}
+
+.warningIcon {
+  color: #F59E0B;
+}
+
+.statusTitle {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.statusMessage {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(181, 126, 220, 0.4);
+  margin-bottom: 1rem;
+}
+
+.primaryButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(181, 126, 220, 0.5);
+}
+
+.primaryButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--color-primary);
+  text-decoration: none;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.secondaryButton:hover {
+  background: var(--color-primary-light);
+}
+
+/* Spinner */
+.spinnerIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Resend Form */
+.resendForm {
+  margin: 1.5rem 0;
+}
+
+.resendLabel {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.resendInputGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.resendInput {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  border: 2px solid var(--color-primary-light);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+.resendInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(181, 126, 220, 0.2);
+}
+
+.resendInput::placeholder {
+  color: #9CA3AF;
+}
+
+.resendButton {
+  padding: 0.75rem 1rem;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resendButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.resendButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Resend Success */
+.resendSuccess {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #D1FAE5;
+  border: 1px solid #A7F3D0;
+  border-radius: var(--radius-md);
+  color: #059669;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 1.5rem 0;
+}
+
+/* Footer */
+.footer {
+  padding: 1rem 2rem;
+  text-align: center;
+  border-top: 1px solid var(--color-primary-light);
+}
+
+.footer p {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .verifyContainer {
+    padding: 0;
+    align-items: flex-start;
+  }
+
+  .verifyCard {
+    max-width: 100%;
+    border-radius: 0;
+    min-height: 100vh;
+  }
+
+  .brandSection {
+    padding: 2rem 1.5rem;
+  }
+
+  .contentSection {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .verifyCard {
+  background: var(--color-card-dark);
+}
+
+[data-theme="dark"] .statusTitle {
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .resendInput {
+  background: var(--color-input-bg);
+  border-color: var(--color-border);
+  color: var(--color-text-dark);
+}
+
+[data-theme="dark"] .footer {
+  border-top-color: var(--color-border);
+}

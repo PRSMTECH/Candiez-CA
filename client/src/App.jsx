@@ -13,6 +13,8 @@ import { antdMobileTheme } from './theme/antdMobileTheme';
 
 // Pages
 import Login from './pages/Login';
+import Signup from './pages/Signup';
+import VerifyEmail from './pages/VerifyEmail';
 import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import CustomerNew from './pages/CustomerNew';
@@ -45,6 +47,8 @@ function App() {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/verify-email" element={<VerifyEmail />} />
 
                     {/* Protected Routes with Layout (Sidebar) */}
                     <Route

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import { authenticate, authorize, generateToken } from './middleware/auth.js';
 import db, { initializeDatabase } from './db/database.js';
+import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail, verifyEmailConfig } from './services/email.js';
 
 dotenv.config();
 
@@ -25,27 +26,30 @@ const seedAdminUser = () => {
   if (!adminExists) {
     const passwordHash = bcrypt.hashSync('admin123', 10);
     db.prepare(`
-      INSERT INTO users (email, password_hash, first_name, last_name, role, status)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run('admin@candiez.com', passwordHash, 'Admin', 'User', 'admin', 'active');
+      INSERT INTO users (email, password_hash, first_name, last_name, role, status, email_verified, referral_code)
+      VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+    `).run('admin@candiez.com', passwordHash, 'Admin', 'User', 'admin', 'active', 'ADUS0001');
 
     const managerHash = bcrypt.hashSync('manager123', 10);
     db.prepare(`
-      INSERT INTO users (email, password_hash, first_name, last_name, role, status)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run('manager@candiez.com', managerHash, 'Manager', 'User', 'manager', 'active');
+      INSERT INTO users (email, password_hash, first_name, last_name, role, status, email_verified, referral_code)
+      VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+    `).run('manager@candiez.com', managerHash, 'Manager', 'User', 'manager', 'active', 'MAUS0002');
 
     const budtenderHash = bcrypt.hashSync('budtender123', 10);
     db.prepare(`
-      INSERT INTO users (email, password_hash, first_name, last_name, role, status)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run('budtender@candiez.com', budtenderHash, 'Bud', 'Tender', 'budtender', 'active');
+      INSERT INTO users (email, password_hash, first_name, last_name, role, status, email_verified, referral_code)
+      VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+    `).run('budtender@candiez.com', budtenderHash, 'Bud', 'Tender', 'budtender', 'active', 'BUTE0003');
 
     console.log('Demo users created successfully');
   }
 };
 
 seedAdminUser();
+
+// Verify email configuration on startup
+verifyEmailConfig();
 
 // Middleware
 app.use(cors());
@@ -57,6 +61,20 @@ const generateTransactionNumber = () => {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
+};
+
+// Helper to generate unique referral code
+const generateReferralCode = (firstName, lastName) => {
+  const prefix = (firstName.substring(0, 2) + lastName.substring(0, 2)).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const code = `${prefix}${random}`;
+
+  // Check if code exists, regenerate if so
+  const existing = db.prepare('SELECT id FROM users WHERE referral_code = ?').get(code);
+  if (existing) {
+    return generateReferralCode(firstName, lastName); // Recursive call to generate new code
+  }
+  return code;
 };
 
 // Health check endpoint (public)
@@ -145,6 +163,280 @@ app.post('/api/auth/logout', authenticate, (req, res) => {
   res.json({
     message: 'Logged out successfully'
   });
+});
+
+// ==========================================
+// REGISTRATION ENDPOINTS (Public)
+// ==========================================
+
+// Register new user
+app.post('/api/auth/register', async (req, res) => {
+  const { email, password, firstName, lastName, phone, role, referralCode } = req.body;
+
+  // Validation
+  if (!email || !password || !firstName || !lastName) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Email, password, first name, and last name are required'
+    });
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Please enter a valid email address'
+    });
+  }
+
+  // Validate password strength (min 8 chars, at least 1 number and 1 letter)
+  if (password.length < 8) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Password must be at least 8 characters long'
+    });
+  }
+
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Password must contain at least one letter and one number'
+    });
+  }
+
+  // Check if user already exists
+  const existingUser = db.prepare('SELECT id, email_verified FROM users WHERE email = ?').get(email.toLowerCase());
+
+  if (existingUser) {
+    if (!existingUser.email_verified) {
+      // User exists but hasn't verified - allow resending
+      return res.status(409).json({
+        error: 'Email exists',
+        message: 'An account with this email exists but is not verified. Please check your email or request a new verification link.',
+        canResend: true
+      });
+    }
+    return res.status(409).json({
+      error: 'Email exists',
+      message: 'An account with this email already exists'
+    });
+  }
+
+  try {
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+
+    // Hash password
+    const passwordHash = bcrypt.hashSync(password, 10);
+
+    // Validate role (default to budtender if not specified or invalid)
+    const validRoles = ['admin', 'manager', 'budtender'];
+    const userRole = validRoles.includes(role) ? role : 'budtender';
+
+    // Generate unique referral code for the new user
+    const newUserReferralCode = generateReferralCode(firstName, lastName);
+
+    // Look up referrer if referral code provided
+    let referrerId = null;
+    let referrerInfo = null;
+    if (referralCode && referralCode.trim()) {
+      referrerInfo = db.prepare(`
+        SELECT id, first_name, last_name, referral_code
+        FROM users
+        WHERE referral_code = ? AND status = 'active'
+      `).get(referralCode.trim().toUpperCase());
+
+      if (referrerInfo) {
+        referrerId = referrerInfo.id;
+      }
+    }
+
+    // Insert user with pending status and referral info
+    const result = db.prepare(`
+      INSERT INTO users (email, password_hash, first_name, last_name, role, status, phone, email_verified, email_verification_token, email_verification_expires, referral_code, referred_by_user_id, referred_by_code)
+      VALUES (?, ?, ?, ?, ?, 'pending', ?, 0, ?, ?, ?, ?, ?)
+    `).run(
+      email.toLowerCase(),
+      passwordHash,
+      firstName.trim(),
+      lastName.trim(),
+      userRole,
+      phone || null,
+      verificationToken,
+      tokenExpires,
+      newUserReferralCode,
+      referrerId,
+      referralCode ? referralCode.trim().toUpperCase() : null
+    );
+
+    // Track referral relationship if referrer exists
+    if (referrerId) {
+      db.prepare(`
+        INSERT INTO referral_tracking (referrer_id, referred_id, referral_code, level)
+        VALUES (?, ?, ?, 1)
+      `).run(referrerId, result.lastInsertRowid, referralCode.trim().toUpperCase());
+
+      // Award signup bonus points to referrer (optional)
+      db.prepare(`
+        INSERT INTO referral_rewards (referrer_id, referred_id, reward_type, points_earned, description)
+        VALUES (?, ?, 'signup_bonus', 100, ?)
+      `).run(referrerId, result.lastInsertRowid, `Referral signup: ${firstName} ${lastName}`);
+
+      console.log(`Referral tracked: ${referrerInfo.first_name} ${referrerInfo.last_name} referred ${firstName} ${lastName}`);
+    }
+
+    // Send verification email
+    const emailResult = await sendVerificationEmail(email.toLowerCase(), firstName, verificationToken);
+
+    if (!emailResult.success) {
+      console.error('Failed to send verification email:', emailResult.error);
+      // Still return success - user was created, just email failed
+      return res.status(201).json({
+        message: 'Account created. Please contact support for verification assistance.',
+        userId: result.lastInsertRowid,
+        emailSent: false,
+        warning: 'Verification email could not be sent. Please contact support.'
+      });
+    }
+
+    res.status(201).json({
+      message: 'Account created successfully! Please check your email to verify your account.',
+      userId: result.lastInsertRowid,
+      emailSent: true,
+      referralCode: newUserReferralCode,
+      referredBy: referrerInfo ? `${referrerInfo.first_name} ${referrerInfo.last_name}` : null
+    });
+
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({
+      error: 'Registration failed',
+      message: 'An error occurred during registration. Please try again.'
+    });
+  }
+});
+
+// Verify email with token
+app.get('/api/auth/verify-email/:token', async (req, res) => {
+  const { token } = req.params;
+
+  if (!token) {
+    return res.status(400).json({
+      error: 'Invalid request',
+      message: 'Verification token is required'
+    });
+  }
+
+  // Find user with this token
+  const user = db.prepare(`
+    SELECT id, email, first_name, email_verification_expires
+    FROM users
+    WHERE email_verification_token = ? AND email_verified = 0
+  `).get(token);
+
+  if (!user) {
+    return res.status(404).json({
+      error: 'Invalid token',
+      message: 'This verification link is invalid or has already been used.'
+    });
+  }
+
+  // Check if token is expired
+  if (new Date(user.email_verification_expires) < new Date()) {
+    return res.status(410).json({
+      error: 'Token expired',
+      message: 'This verification link has expired. Please request a new one.',
+      canResend: true,
+      email: user.email
+    });
+  }
+
+  try {
+    // Update user to verified and active
+    db.prepare(`
+      UPDATE users
+      SET email_verified = 1,
+          status = 'active',
+          email_verification_token = NULL,
+          email_verification_expires = NULL,
+          updated_at = datetime('now')
+      WHERE id = ?
+    `).run(user.id);
+
+    // Send welcome email
+    await sendWelcomeEmail(user.email, user.first_name);
+
+    res.json({
+      message: 'Email verified successfully! Your account is now active.',
+      verified: true
+    });
+
+  } catch (error) {
+    console.error('Verification error:', error);
+    res.status(500).json({
+      error: 'Verification failed',
+      message: 'An error occurred during verification. Please try again.'
+    });
+  }
+});
+
+// Resend verification email
+app.post('/api/auth/resend-verification', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      message: 'Email is required'
+    });
+  }
+
+  // Find unverified user
+  const user = db.prepare(`
+    SELECT id, email, first_name
+    FROM users
+    WHERE email = ? AND email_verified = 0
+  `).get(email.toLowerCase());
+
+  if (!user) {
+    // Don't reveal if user exists or not for security
+    return res.json({
+      message: 'If an unverified account exists with this email, a new verification link has been sent.'
+    });
+  }
+
+  try {
+    // Generate new verification token
+    const verificationToken = generateVerificationToken();
+    const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    // Update user with new token
+    db.prepare(`
+      UPDATE users
+      SET email_verification_token = ?,
+          email_verification_expires = ?,
+          updated_at = datetime('now')
+      WHERE id = ?
+    `).run(verificationToken, tokenExpires, user.id);
+
+    // Send new verification email
+    const emailResult = await sendVerificationEmail(user.email, user.first_name, verificationToken);
+
+    res.json({
+      message: 'If an unverified account exists with this email, a new verification link has been sent.',
+      sent: emailResult.success
+    });
+
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    res.status(500).json({
+      error: 'Request failed',
+      message: 'An error occurred. Please try again.'
+    });
+  }
 });
 
 // ==========================================

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
 import styles from './Login.module.css';
@@ -150,6 +150,12 @@ function Login() {
               <span>Sign In</span>
             )}
           </button>
+
+          {/* Sign Up Link */}
+          <div className={styles.signUpLink}>
+            <span>Don't have an account?</span>
+            <Link to="/signup">Create Account</Link>
+          </div>
         </form>
 
         {/* Footer */}
