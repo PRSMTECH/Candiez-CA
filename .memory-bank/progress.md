@@ -4,7 +4,58 @@
 **Current Sprint**: Sprint 1
 **Sprint Goal**: Complete core CRM and inventory functionality
 
-## Latest Session (2026-01-12)
+## Latest Session (2026-01-12 Night)
+
+### Deployment
+- **URL**: https://candiez.shop (production)
+- **Backend**: https://candiez-ca-production.up.railway.app
+- **Branch**: master
+- **Commit**: b0e1461
+- **Changes**: Password reset flow implementation
+
+### Completed This Session
+- [x] Fixed Vercel SPA routing (404s on client-side routes)
+- [x] Implemented Forgot Password page (/forgot-password)
+- [x] Implemented Reset Password page (/reset-password)
+- [x] Added password reset email template (dark candy theme, orange CTA)
+- [x] Added API endpoints for password reset flow
+- [x] Added database migration for password_reset_token columns
+- [x] Updated Login page forgot password link to use React Router
+- [x] Fixed CLIENT_URL to default to production URL
+- [x] Tested password reset flow end-to-end
+- [x] All email templates include logo images from Supabase
+
+### Next Up
+- [ ] Add test framework (Jest/Vitest)
+- [ ] Set up CI/CD pipeline
+- [ ] Add monitoring/logging
+- [ ] Customer onboarding and training docs
+
+---
+
+## Earlier Session (2026-01-12 Evening)
+
+### Deployment
+- **URL**: https://candiez.shop (production)
+- **Preview**: https://client-k7ao3livc-prsmtechbuilds.vercel.app
+- **Branch**: master
+- **Commit**: e9c00b7
+- **Changes**: AnimatedLogo component and professional email templates
+
+### Completed This Session
+- [x] Created AnimatedLogo component with crossfade animation
+- [x] Integrated AnimatedLogo in Login, Signup, and Sidebar pages
+- [x] Fixed Resend API key loading (dotenv/config ES module pattern)
+- [x] Redesigned email verification template (dark candy theme)
+- [x] Redesigned welcome email template (feature grid + referral promo)
+- [x] Added logo images from Supabase storage to email templates
+- [x] Created email template preview HTML file
+- [x] Ran E2E tests with Playwright MCP (signup, login flows)
+- [x] Deployed to Vercel production
+
+---
+
+## Earlier Session (2026-01-12 Morning)
 
 ### Deployment
 - **URL**: https://candiez.shop (production)
@@ -25,11 +76,6 @@
 - [x] Vercel project consolidation (merged client + candiez-ca)
 - [x] Connected GitHub auto-deploy to PRSMTECH/Candiez-CA
 - [x] Domain candiez.shop reassigned to consolidated project
-
-### Next Up
-- [ ] Add test framework (Jest/Vitest)
-- [ ] Set up CI/CD pipeline
-- [ ] Add monitoring/logging
 
 ## Session (2026-01-10)
 
@@ -78,10 +124,12 @@
 - [x] Reports dashboard
 - [x] Settings page
 - [x] Loyalty program
+- [x] Sign-up with email verification
+- [x] Password reset flow
 
 **Deferred**:
 - [ ] Test framework setup
-- [ ] Production deployment
+- [ ] CI/CD pipeline
 
 ---
 **Usage**: Update at end of each session with progress made
