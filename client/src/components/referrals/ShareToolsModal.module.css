@@ -1,0 +1,347 @@
+/* Share Tools Modal Styles */
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  color: var(--color-text-primary);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-border-light);
+  padding: 0 1rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tab.active {
+  color: var(--color-primary);
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+}
+
+/* Content */
+.content {
+  padding: 1.5rem;
+}
+
+/* QR Code Tab */
+.qrTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.qrCodeWrapper {
+  background: white;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border-light);
+  margin-bottom: 1rem;
+}
+
+.qrCode {
+  display: block;
+  width: 200px;
+  height: 200px;
+}
+
+.qrPlaceholder {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.qrHelp {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.codeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+}
+
+.codeLabel {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.codeValue {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.1em;
+}
+
+.downloadBtn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.downloadBtn:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+/* Share Tab */
+.shareTab {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.linkSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.linkSection label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.linkInput {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.linkInput input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  background: var(--color-bg-light);
+  color: var(--color-text-primary);
+}
+
+.linkInput button {
+  padding: 0.75rem 1rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.linkInput button:hover {
+  background: var(--color-primary-dark);
+}
+
+.shareButtons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.shareBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.shareBtn:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.shareIcon {
+  font-size: 1.5rem;
+}
+
+/* Messages Tab */
+.messagesTab {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.messageCard {
+  background: var(--color-bg-light);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  border: 1px solid var(--color-border-light);
+}
+
+.messageCard h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.messagePreview {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  margin-bottom: 0.75rem;
+  max-height: 80px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.messageActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.copyMessageBtn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyMessageBtn:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .modal {
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .tabs {
+    padding: 0;
+  }
+
+  .tab {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .qrCode {
+    width: 160px;
+    height: 160px;
+  }
+
+  .qrPlaceholder {
+    width: 160px;
+    height: 160px;
+  }
+
+  .shareButtons {
+    gap: 0.5rem;
+  }
+
+  .shareBtn {
+    padding: 0.75rem 1rem;
+    min-width: 70px;
+  }
+}

@@ -301,4 +301,39 @@
 - Total: 27 tests passing
 
 ---
+
+## 2026-01-12 - Ambassador Program Implementation
+
+**Context**: Client requested commission-based referral program to incentivize customer referrals
+
+**Decision**: Implement tiered Ambassador Program with commission tracking on transactions
+
+**Rationale**:
+- Built on existing referral_tracking foundation from earlier implementation
+- Commission calculated on subtotal (before tax) - commission on product sales only
+- Four-tier system provides growth incentive: Member (5%), Promoter (7.5%), Ambassador (10%), Elite (15%)
+- Automatic tier upgrades based on referral count and sales volume
+- Store credit redemption allows immediate use of earnings
+- Commission reversal on refunds/voids maintains financial integrity
+
+**Key Implementation Details**:
+- Database: ambassador_tiers table for tier config, referral_payouts for redemption tracking
+- User columns: ambassador_tier, total_referral_earnings, available_balance, lifetime stats
+- API: 5 referrals endpoints (dashboard, network, earnings, history, redeem)
+- API: 5 admin endpoints (analytics, payouts management, tier config)
+- Commission tracking integrated into POS transaction endpoint
+- QR code generation with qrcode npm package for easy sharing
+
+**Alternatives Considered**:
+- Flat commission rate (less engaging, no growth incentive)
+- Points-only rewards (separate from existing loyalty - confusing)
+- Third-party referral service (added cost, integration complexity)
+
+**Impact**:
+- New pages: /referrals (user dashboard), /admin/referrals (admin management)
+- Share tools: QR codes, copy link, SMS/email templates, Web Share API
+- Unit tests: 32 tests covering commission calculation, reversal, tier logic
+- Admin can manage payouts, configure tier rates, view program analytics
+
+---
 **Usage**: Add entry whenever making significant technical decisions

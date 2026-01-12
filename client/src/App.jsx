@@ -32,7 +32,9 @@ import TransactionDetail from './pages/TransactionDetail';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Categories from './pages/Categories';
+import Referrals from './pages/Referrals';
 import Users from './pages/admin/Users';
+import ReferralAdmin from './pages/admin/ReferralAdmin';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -73,6 +75,7 @@ function App() {
                       <Route path="/products/new" element={<ProductNew />} />
                       <Route path="/products/:id/edit" element={<ProductEdit />} />
                       <Route path="/categories" element={<Categories />} />
+                      <Route path="/referrals" element={<Referrals />} />
 
                       {/* Manager and Admin only */}
                       <Route
@@ -114,6 +117,14 @@ function App() {
                         element={
                           <ProtectedRoute allowedRoles={['admin']}>
                             <Users />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/referrals"
+                        element={
+                          <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                            <ReferralAdmin />
                           </ProtectedRoute>
                         }
                       />

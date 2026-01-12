@@ -4,7 +4,42 @@
 **Current Sprint**: Sprint 1
 **Sprint Goal**: Complete core CRM and inventory functionality
 
-## Latest Session (2026-01-12 Late Night)
+## Latest Session (2026-01-12 Ambassador Program)
+
+### Deployment
+- **URL**: https://candiez.shop (production)
+- **Backend**: https://candiez-ca-production.up.railway.app
+- **Branch**: master
+- **Changes**: Ambassador Program complete implementation
+
+### Completed This Session
+- [x] Phase 1: Database schema updates (ambassador_tiers, referral_payouts, user columns)
+- [x] Phase 2a: Commission tracking in POS transaction endpoint
+- [x] Phase 2b: Referrals API endpoints (dashboard, network, earnings, history, redeem)
+- [x] Phase 3: Referrals dashboard page (/referrals) with stats, tier progress, referral list
+- [x] Phase 4: Share tools modal (QR code, copy link, SMS/email templates, Web Share API)
+- [x] Phase 5: Admin panel (/admin/referrals) with analytics, payout management, tier config
+- [x] Testing: 32 unit tests for commission calculation, reversal, tier logic
+- [x] All 43 tests passing (32 referral + 11 auth)
+- [x] Updated decision log with Ambassador Program implementation
+
+### Ambassador Program Features
+- 4-tier system: Member (5%), Promoter (7.5%), Ambassador (10%), Elite (15%)
+- Commission on subtotal (before tax)
+- Automatic tier upgrades based on referrals and sales
+- QR code generation for easy sharing
+- Admin payout management (approve, cancel, mark paid)
+- Commission reversal on refunds/voids
+
+### Next Up
+- [ ] Set up CI/CD pipeline (GitHub Actions)
+- [ ] Add monitoring/logging
+- [ ] Customer onboarding and training docs
+- [ ] Deploy Ambassador Program to production
+
+---
+
+## Earlier Session (2026-01-12 Late Night)
 
 ### Deployment
 - **URL**: https://candiez.shop (production)
@@ -25,12 +60,6 @@
 - [x] Updated CLAUDE.md with testing documentation
 - [x] Added tmpclaude-* to .gitignore
 - [x] Verified all 27 tests pass (16 client + 11 server)
-
-### Next Up
-- [ ] Set up CI/CD pipeline (GitHub Actions)
-- [ ] Add monitoring/logging
-- [ ] Customer onboarding and training docs
-- [ ] Expand test coverage
 
 ---
 
@@ -151,6 +180,7 @@
 - [x] Sign-up with email verification
 - [x] Password reset flow
 - [x] Test framework (Vitest)
+- [x] Ambassador Program (referral commissions, share tools, admin panel)
 
 **Deferred**:
 - [ ] CI/CD pipeline

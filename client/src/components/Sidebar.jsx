@@ -11,6 +11,8 @@ import {
   Warehouse,
   Receipt,
   BarChart3,
+  Gift,
+  Award,
   Settings,
   UserCog,
   LogOut,
@@ -27,6 +29,8 @@ function Sidebar({ collapsed, onToggle }) {
 
   // Role-based access control for menu items
   const isAdmin = user?.role === 'admin';
+  const isManager = user?.role === 'manager';
+  const showAdminSection = isAdmin || isManager;
 
   const menuItems = [
     {
@@ -76,11 +80,23 @@ function Sidebar({ collapsed, onToggle }) {
       icon: BarChart3,
       label: 'Reports',
       roles: ['admin', 'manager']
+    },
+    {
+      path: '/referrals',
+      icon: Gift,
+      label: 'Referrals',
+      roles: ['admin', 'manager', 'budtender']
     }
   ];
 
   // Admin-only menu items
   const adminMenuItems = [
+    {
+      path: '/admin/referrals',
+      icon: Award,
+      label: 'Ambassador Admin',
+      roles: ['admin', 'manager']
+    },
     {
       path: '/admin/users',
       icon: UserCog,
@@ -146,8 +162,8 @@ function Sidebar({ collapsed, onToggle }) {
           })}
         </ul>
 
-        {/* Admin Section - Only visible to admins */}
-        {isAdmin && (
+        {/* Admin Section - Visible to admins and managers */}
+        {showAdminSection && (
           <>
             <div className={styles.divider}>
               {!collapsed && <span>Admin</span>}

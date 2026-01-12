@@ -1,0 +1,533 @@
+/* Referrals Page Styles */
+
+.container {
+  padding: 2rem;
+  background: var(--color-bg-light);
+  min-height: 100%;
+}
+
+.pageHeader {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+
+/* Referral Code Card */
+.codeCard {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.codeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.codeHeader h2 {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.tierBadge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.codeDisplay {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.copyBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.copyBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.linkSection {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.linkInput {
+  flex: 1;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.linkInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.linkBtn {
+  background: white;
+  color: var(--color-primary);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.linkBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.shareBtn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shareBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--color-primary);
+}
+
+.statCard h3 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.statCard.earnings {
+  border-left-color: var(--color-success);
+}
+
+.statCard.earnings .statValue {
+  color: var(--color-success);
+}
+
+/* Tier Progress */
+.progressSection {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.progressHeader h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.nextTier {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.progressBar {
+  height: 12px;
+  background: var(--color-bg-light);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+.progressMetrics {
+  display: flex;
+  gap: 2rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.progressMetrics span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progressMetrics strong {
+  color: var(--color-text-primary);
+}
+
+/* Earnings Card */
+.earningsCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+.earningsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.earningsHeader h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.balanceDisplay {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.balanceAmount {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.redeemBtn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.redeemBtn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.redeemBtn:disabled {
+  background: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-border-light);
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  position: relative;
+  bottom: -2px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* Data Tables */
+.dataCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.table th {
+  background: var(--color-bg-light);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.statusBadge.active {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--color-success);
+}
+
+.statusBadge.inactive {
+  background: rgba(156, 163, 175, 0.1);
+  color: var(--color-text-secondary);
+}
+
+.amountPositive {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.amountNegative {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+}
+
+.emptyState p {
+  margin-bottom: 1rem;
+}
+
+/* Commission Rate Display */
+.commissionRate {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.5rem;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+}
+
+.modalContent h3 {
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+}
+
+.modalContent input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.modalButtons button {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.confirmBtn {
+  background: var(--color-primary);
+  border: none;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .code {
+    font-size: 1.75rem;
+  }
+
+  .codeDisplay {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .balanceDisplay {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table {
+    font-size: 0.75rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.75rem 0.5rem;
+  }
+}

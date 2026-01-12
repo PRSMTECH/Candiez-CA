@@ -77,6 +77,108 @@ const generateReferralCode = (firstName, lastName) => {
   return code;
 };
 
+// Helper to calculate and award referral commission
+const processReferralCommission = (customerId, transactionId, subtotal) => {
+  // Check if customer was referred by a staff/ambassador user
+  const customer = db.prepare(`
+    SELECT referred_by_user_id, referred_by_code
+    FROM customers
+    WHERE id = ?
+  `).get(customerId);
+
+  if (!customer || !customer.referred_by_user_id) {
+    return null; // No referrer
+  }
+
+  // Get referrer and their ambassador tier
+  const referrer = db.prepare(`
+    SELECT u.id, u.first_name, u.last_name, u.ambassador_tier, u.available_balance,
+           u.total_referral_earnings, u.lifetime_referral_sales,
+           at.commission_rate
+    FROM users u
+    LEFT JOIN ambassador_tiers at ON u.ambassador_tier = at.tier_name
+    WHERE u.id = ? AND u.status = 'active'
+  `).get(customer.referred_by_user_id);
+
+  if (!referrer) {
+    return null; // Referrer not found or inactive
+  }
+
+  // Calculate commission (default to 5% if tier not found)
+  const commissionRate = referrer.commission_rate || 0.05;
+  const commissionAmount = subtotal * commissionRate;
+
+  if (commissionAmount <= 0) {
+    return null;
+  }
+
+  // Credit commission to referrer's available_balance
+  db.prepare(`
+    UPDATE users SET
+      available_balance = available_balance + ?,
+      total_referral_earnings = total_referral_earnings + ?,
+      lifetime_referral_sales = lifetime_referral_sales + ?,
+      updated_at = datetime('now')
+    WHERE id = ?
+  `).run(commissionAmount, commissionAmount, subtotal, referrer.id);
+
+  // Record in referral_rewards table
+  db.prepare(`
+    INSERT INTO referral_rewards (referrer_id, referred_id, transaction_id, reward_type, amount, description)
+    VALUES (?, ?, ?, 'transaction_commission', ?, ?)
+  `).run(
+    referrer.id,
+    customerId, // Store customer ID in referred_id field
+    transactionId,
+    commissionAmount,
+    `${(commissionRate * 100).toFixed(1)}% commission on $${subtotal.toFixed(2)} purchase`
+  );
+
+  return {
+    referrerId: referrer.id,
+    referrerName: `${referrer.first_name} ${referrer.last_name}`,
+    commissionRate,
+    commissionAmount
+  };
+};
+
+// Helper to reverse referral commission (for voids/refunds)
+const reverseReferralCommission = (transactionId) => {
+  // Find any commission awarded for this transaction
+  const reward = db.prepare(`
+    SELECT * FROM referral_rewards
+    WHERE transaction_id = ? AND reward_type = 'transaction_commission'
+  `).get(transactionId);
+
+  if (!reward) {
+    return null; // No commission to reverse
+  }
+
+  // Deduct from referrer's available_balance
+  db.prepare(`
+    UPDATE users SET
+      available_balance = MAX(0, available_balance - ?),
+      total_referral_earnings = MAX(0, total_referral_earnings - ?),
+      lifetime_referral_sales = MAX(0, lifetime_referral_sales - ?),
+      updated_at = datetime('now')
+    WHERE id = ?
+  `).run(reward.amount, reward.amount, reward.amount / (reward.amount > 0 ? 1 : 0.05), reward.referrer_id);
+
+  // Record reversal
+  db.prepare(`
+    INSERT INTO referral_rewards (referrer_id, referred_id, transaction_id, reward_type, amount, description)
+    VALUES (?, ?, ?, 'transaction_commission', ?, ?)
+  `).run(
+    reward.referrer_id,
+    reward.referred_id,
+    transactionId,
+    -reward.amount,
+    `Commission reversal - transaction voided/refunded`
+  );
+
+  return { reversed: reward.amount, referrerId: reward.referrer_id };
+};
+
 // Health check endpoint (public)
 app.get('/api/health', (req, res) => {
   res.json({
@@ -1461,8 +1563,18 @@ app.post('/api/transactions', authenticate, (req, res) => {
       }
     }
 
+    // Process referral commission if customer was referred by staff/ambassador
+    let referralCommission = null;
+    if (customer_id) {
+      referralCommission = processReferralCommission(customer_id, transactionId, subtotal);
+    }
+
     const transaction = db.prepare('SELECT * FROM transactions WHERE id = ?').get(transactionId);
-    res.status(201).json({ transaction, message: 'Transaction completed successfully' });
+    res.status(201).json({
+      transaction,
+      referralCommission,
+      message: 'Transaction completed successfully'
+    });
   } catch (error) {
     console.error('Create transaction error:', error);
     res.status(500).json({ error: 'Failed to create transaction' });
@@ -1486,6 +1598,9 @@ app.post('/api/transactions/:id/void', authenticate, authorize('admin', 'manager
         .run(item.quantity, item.product_id);
     }
 
+    // Reverse any referral commission for this transaction
+    const commissionReversed = reverseReferralCommission(req.params.id);
+
     // Void the transaction
     db.prepare(`
       UPDATE transactions SET
@@ -1493,7 +1608,10 @@ app.post('/api/transactions/:id/void', authenticate, authorize('admin', 'manager
       WHERE id = ?
     `).run(req.user.id, reason || null, req.params.id);
 
-    res.json({ message: 'Transaction voided successfully' });
+    res.json({
+      message: 'Transaction voided successfully',
+      commissionReversed
+    });
   } catch (error) {
     console.error('Void transaction error:', error);
     res.status(500).json({ error: 'Failed to void transaction' });
@@ -1597,6 +1715,43 @@ app.post('/api/transactions/:id/refund', authenticate, authorize('admin', 'manag
       `).run(transaction.customer_id, req.params.id, -pointsToReverse);
     }
 
+    // Proportionally reverse referral commission for partial refund
+    let commissionReversed = null;
+    const originalReward = db.prepare(`
+      SELECT * FROM referral_rewards
+      WHERE transaction_id = ? AND reward_type = 'transaction_commission' AND amount > 0
+    `).get(req.params.id);
+
+    if (originalReward && refundSubtotal > 0) {
+      // Calculate proportional reversal based on refund amount vs original subtotal
+      const refundRatio = refundSubtotal / transaction.subtotal;
+      const commissionToReverse = originalReward.amount * refundRatio;
+
+      // Deduct from referrer's balance
+      db.prepare(`
+        UPDATE users SET
+          available_balance = MAX(0, available_balance - ?),
+          total_referral_earnings = MAX(0, total_referral_earnings - ?),
+          lifetime_referral_sales = MAX(0, lifetime_referral_sales - ?),
+          updated_at = datetime('now')
+        WHERE id = ?
+      `).run(commissionToReverse, commissionToReverse, refundSubtotal, originalReward.referrer_id);
+
+      // Record reversal
+      db.prepare(`
+        INSERT INTO referral_rewards (referrer_id, referred_id, transaction_id, reward_type, amount, description)
+        VALUES (?, ?, ?, 'transaction_commission', ?, ?)
+      `).run(
+        originalReward.referrer_id,
+        originalReward.referred_id,
+        req.params.id,
+        -commissionToReverse,
+        `Commission reversal - $${refundSubtotal.toFixed(2)} refunded (${(refundRatio * 100).toFixed(1)}%)`
+      );
+
+      commissionReversed = { amount: commissionToReverse, referrerId: originalReward.referrer_id };
+    }
+
     res.json({
       message: 'Refund processed successfully',
       refund: {
@@ -1606,7 +1761,8 @@ app.post('/api/transactions/:id/refund', authenticate, authorize('admin', 'manag
         tax_amount: refundTax,
         total: totalRefund,
         items: refundedItems
-      }
+      },
+      commissionReversed
     });
   } catch (error) {
     console.error('Refund transaction error:', error);
@@ -1994,6 +2150,563 @@ app.get('/api/activity', authenticate, authorize('admin', 'manager'), (req, res)
   } catch (error) {
     console.error('Get activity error:', error);
     res.status(500).json({ error: 'Failed to fetch activity log' });
+  }
+});
+
+// ==========================================
+// REFERRALS/AMBASSADOR ENDPOINTS
+// ==========================================
+
+// Get referral dashboard (current user's referral stats)
+app.get('/api/referrals/dashboard', authenticate, (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get user's referral info and tier
+    const user = db.prepare(`
+      SELECT u.id, u.first_name, u.last_name, u.referral_code, u.ambassador_tier,
+             u.total_referral_earnings, u.available_balance, u.lifetime_referral_count,
+             u.lifetime_referral_sales,
+             at.commission_rate, at.signup_bonus_points, at.min_referrals, at.min_sales
+      FROM users u
+      LEFT JOIN ambassador_tiers at ON u.ambassador_tier = at.tier_name
+      WHERE u.id = ?
+    `).get(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get next tier (for progress tracking)
+    const nextTier = db.prepare(`
+      SELECT * FROM ambassador_tiers
+      WHERE sort_order > (SELECT sort_order FROM ambassador_tiers WHERE tier_name = ?)
+      ORDER BY sort_order ASC
+      LIMIT 1
+    `).get(user.ambassador_tier || 'Member');
+
+    // Count active referrals (customers referred by this user)
+    const activeReferrals = db.prepare(`
+      SELECT COUNT(*) as count
+      FROM customers
+      WHERE referred_by_user_id = ? AND status = 'active'
+    `).get(userId);
+
+    // Get pending commission (from recent transactions not yet cashed out)
+    const pendingCommission = db.prepare(`
+      SELECT COALESCE(SUM(amount), 0) as total
+      FROM referral_rewards
+      WHERE referrer_id = ? AND reward_type = 'transaction_commission' AND amount > 0
+      AND created_at >= datetime('now', '-30 days')
+    `).get(userId);
+
+    // Generate referral link
+    const clientUrl = process.env.CLIENT_URL || 'https://candiez.shop';
+    const referralLink = `${clientUrl}/signup?ref=${user.referral_code}`;
+
+    res.json({
+      referral_code: user.referral_code,
+      referral_link: referralLink,
+      current_tier: {
+        name: user.ambassador_tier || 'Member',
+        commission_rate: user.commission_rate || 0.05,
+        signup_bonus_points: user.signup_bonus_points || 50
+      },
+      next_tier: nextTier ? {
+        name: nextTier.tier_name,
+        commission_rate: nextTier.commission_rate,
+        referrals_needed: Math.max(0, nextTier.min_referrals - (user.lifetime_referral_count || 0)),
+        sales_needed: Math.max(0, nextTier.min_sales - (user.lifetime_referral_sales || 0))
+      } : null,
+      stats: {
+        total_referrals: user.lifetime_referral_count || 0,
+        active_referrals: activeReferrals?.count || 0,
+        total_earnings: user.total_referral_earnings || 0,
+        available_balance: user.available_balance || 0,
+        pending_commission: pendingCommission?.total || 0
+      },
+      tier_progress: {
+        referrals: user.lifetime_referral_count || 0,
+        sales: user.lifetime_referral_sales || 0
+      }
+    });
+  } catch (error) {
+    console.error('Get referral dashboard error:', error);
+    res.status(500).json({ error: 'Failed to fetch referral dashboard' });
+  }
+});
+
+// Get referral network (list of referred customers)
+app.get('/api/referrals/network', authenticate, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    // Get referred customers with their purchase stats
+    const referrals = db.prepare(`
+      SELECT
+        c.id,
+        c.first_name,
+        c.last_name,
+        c.created_at as joined_at,
+        c.status,
+        COUNT(DISTINCT t.id) as purchase_count,
+        COALESCE(SUM(CASE WHEN t.voided = 0 THEN t.subtotal ELSE 0 END), 0) as total_spent,
+        COALESCE(SUM(CASE WHEN rr.amount > 0 THEN rr.amount ELSE 0 END), 0) as commission_earned
+      FROM customers c
+      LEFT JOIN transactions t ON t.customer_id = c.id
+      LEFT JOIN referral_rewards rr ON rr.referred_id = c.id AND rr.referrer_id = ?
+      WHERE c.referred_by_user_id = ?
+      GROUP BY c.id
+      ORDER BY c.created_at DESC
+      LIMIT ? OFFSET ?
+    `).all(userId, userId, limit, offset);
+
+    // Get total count
+    const totalCount = db.prepare(`
+      SELECT COUNT(*) as count FROM customers WHERE referred_by_user_id = ?
+    `).get(userId);
+
+    // Format for privacy (show initials only)
+    const formattedReferrals = referrals.map(r => ({
+      id: r.id,
+      name: `${r.first_name} ${r.last_name.charAt(0)}.`,
+      initials: `${r.first_name.charAt(0)}${r.last_name.charAt(0)}`,
+      joined_at: r.joined_at,
+      purchase_count: r.purchase_count || 0,
+      total_spent: r.total_spent || 0,
+      commission_earned: r.commission_earned || 0,
+      status: r.status
+    }));
+
+    res.json({
+      referrals: formattedReferrals,
+      pagination: {
+        page,
+        limit,
+        total: totalCount?.count || 0,
+        pages: Math.ceil((totalCount?.count || 0) / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get referral network error:', error);
+    res.status(500).json({ error: 'Failed to fetch referral network' });
+  }
+});
+
+// Get referral earnings history
+app.get('/api/referrals/earnings', authenticate, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = (page - 1) * limit;
+
+    // Get earnings history
+    const earnings = db.prepare(`
+      SELECT
+        rr.id,
+        rr.reward_type as type,
+        rr.amount,
+        rr.description,
+        rr.transaction_id,
+        rr.created_at,
+        c.first_name || ' ' || substr(c.last_name, 1, 1) || '.' as customer_name
+      FROM referral_rewards rr
+      LEFT JOIN customers c ON c.id = rr.referred_id
+      WHERE rr.referrer_id = ?
+      ORDER BY rr.created_at DESC
+      LIMIT ? OFFSET ?
+    `).all(userId, limit, offset);
+
+    // Get summary stats
+    const summary = db.prepare(`
+      SELECT
+        COALESCE(SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END), 0) as total_earned,
+        COALESCE(SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END), 0) as total_reversed,
+        COALESCE(SUM(CASE WHEN created_at >= datetime('now', 'start of month') AND amount > 0 THEN amount ELSE 0 END), 0) as this_month
+      FROM referral_rewards
+      WHERE referrer_id = ?
+    `).get(userId);
+
+    // Get total count
+    const totalCount = db.prepare(`
+      SELECT COUNT(*) as count FROM referral_rewards WHERE referrer_id = ?
+    `).get(userId);
+
+    res.json({
+      earnings: earnings.map(e => ({
+        id: e.id,
+        type: e.type,
+        amount: e.amount,
+        description: e.description,
+        transaction_id: e.transaction_id,
+        customer_name: e.customer_name,
+        created_at: e.created_at
+      })),
+      summary: {
+        total: summary?.total_earned || 0,
+        reversed: summary?.total_reversed || 0,
+        this_month: summary?.this_month || 0
+      },
+      pagination: {
+        page,
+        limit,
+        total: totalCount?.count || 0,
+        pages: Math.ceil((totalCount?.count || 0) / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get referral earnings error:', error);
+    res.status(500).json({ error: 'Failed to fetch earnings history' });
+  }
+});
+
+// Redeem available balance for store credit
+app.post('/api/referrals/redeem', authenticate, (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { amount, payout_type = 'store_credit' } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid redemption amount' });
+    }
+
+    // Get user's available balance
+    const user = db.prepare(`
+      SELECT available_balance FROM users WHERE id = ?
+    `).get(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (amount > user.available_balance) {
+      return res.status(400).json({ error: 'Insufficient balance', available: user.available_balance });
+    }
+
+    // Create payout request
+    const result = db.prepare(`
+      INSERT INTO referral_payouts (user_id, amount, payout_type, status)
+      VALUES (?, ?, ?, 'pending')
+    `).run(userId, amount, payout_type);
+
+    // For store credit, auto-approve and deduct balance
+    if (payout_type === 'store_credit') {
+      db.prepare(`
+        UPDATE users SET available_balance = available_balance - ?, updated_at = datetime('now')
+        WHERE id = ?
+      `).run(amount, userId);
+
+      db.prepare(`
+        UPDATE referral_payouts SET status = 'approved', approved_at = datetime('now')
+        WHERE id = ?
+      `).run(result.lastInsertRowid);
+    }
+
+    const newBalance = db.prepare('SELECT available_balance FROM users WHERE id = ?').get(userId);
+
+    res.json({
+      success: true,
+      payout_id: result.lastInsertRowid,
+      amount_redeemed: amount,
+      payout_type,
+      new_balance: newBalance?.available_balance || 0,
+      status: payout_type === 'store_credit' ? 'approved' : 'pending'
+    });
+  } catch (error) {
+    console.error('Redeem balance error:', error);
+    res.status(500).json({ error: 'Failed to process redemption' });
+  }
+});
+
+// Get all ambassador tiers (for display)
+app.get('/api/referrals/tiers', authenticate, (req, res) => {
+  try {
+    const tiers = db.prepare(`
+      SELECT tier_name, min_referrals, min_sales, commission_rate, signup_bonus_points
+      FROM ambassador_tiers
+      WHERE is_active = 1
+      ORDER BY sort_order ASC
+    `).all();
+
+    res.json({ tiers });
+  } catch (error) {
+    console.error('Get tiers error:', error);
+    res.status(500).json({ error: 'Failed to fetch tiers' });
+  }
+});
+
+// ========================================
+// ADMIN REFERRAL MANAGEMENT ENDPOINTS
+// ========================================
+
+// GET /api/admin/referrals/analytics - Program-wide statistics (Admin/Manager only)
+app.get('/api/admin/referrals/analytics', authenticate, authorize(['admin', 'manager']), (req, res) => {
+  try {
+    // Overall program stats
+    const totalAmbassadors = db.prepare(`
+      SELECT COUNT(*) as count FROM users WHERE referral_code IS NOT NULL AND status = 'active'
+    `).get()?.count || 0;
+
+    const totalReferrals = db.prepare(`
+      SELECT COUNT(*) as count FROM referral_tracking
+    `).get()?.count || 0;
+
+    const activeReferrals = db.prepare(`
+      SELECT COUNT(*) as count FROM referral_tracking WHERE status = 'active'
+    `).get()?.count || 0;
+
+    const totalCommissionsResult = db.prepare(`
+      SELECT COALESCE(SUM(amount), 0) as total FROM referral_rewards WHERE reward_type = 'transaction_commission'
+    `).get();
+    const totalCommissions = totalCommissionsResult?.total || 0;
+
+    const pendingPayoutsResult = db.prepare(`
+      SELECT COALESCE(SUM(amount), 0) as total FROM referral_payouts WHERE status = 'pending'
+    `).get();
+    const pendingPayouts = pendingPayoutsResult?.total || 0;
+
+    const pendingPayoutsCount = db.prepare(`
+      SELECT COUNT(*) as count FROM referral_payouts WHERE status = 'pending'
+    `).get()?.count || 0;
+
+    // Tier distribution
+    const tierDistribution = db.prepare(`
+      SELECT
+        COALESCE(ambassador_tier, 'Member') as tier,
+        COUNT(*) as count
+      FROM users
+      WHERE referral_code IS NOT NULL AND status = 'active'
+      GROUP BY ambassador_tier
+      ORDER BY count DESC
+    `).all();
+
+    // Top performers (by earnings)
+    const topPerformers = db.prepare(`
+      SELECT
+        u.id,
+        u.first_name || ' ' || u.last_name as name,
+        SUBSTR(u.first_name, 1, 1) || SUBSTR(u.last_name, 1, 1) as initials,
+        u.referral_code,
+        COALESCE(u.ambassador_tier, 'Member') as tier,
+        COALESCE(u.total_referral_earnings, 0) as total_earnings,
+        COALESCE(u.lifetime_referral_count, 0) as referral_count,
+        COALESCE(u.lifetime_referral_sales, 0) as total_sales
+      FROM users u
+      WHERE u.referral_code IS NOT NULL AND u.status = 'active'
+      ORDER BY u.total_referral_earnings DESC
+      LIMIT 10
+    `).all();
+
+    // Recent commissions
+    const recentCommissions = db.prepare(`
+      SELECT
+        rr.id,
+        rr.amount,
+        rr.description,
+        rr.created_at,
+        u.first_name || ' ' || u.last_name as ambassador_name
+      FROM referral_rewards rr
+      JOIN users u ON rr.referrer_id = u.id
+      WHERE rr.reward_type = 'transaction_commission'
+      ORDER BY rr.created_at DESC
+      LIMIT 10
+    `).all();
+
+    // Monthly stats (last 6 months)
+    const monthlyStats = db.prepare(`
+      SELECT
+        strftime('%Y-%m', created_at) as month,
+        COUNT(*) as commission_count,
+        COALESCE(SUM(amount), 0) as total_amount
+      FROM referral_rewards
+      WHERE reward_type = 'transaction_commission'
+        AND created_at >= datetime('now', '-6 months')
+      GROUP BY strftime('%Y-%m', created_at)
+      ORDER BY month DESC
+    `).all();
+
+    res.json({
+      overview: {
+        total_ambassadors: totalAmbassadors,
+        total_referrals: totalReferrals,
+        active_referrals: activeReferrals,
+        total_commissions: totalCommissions,
+        pending_payouts: pendingPayouts,
+        pending_payouts_count: pendingPayoutsCount
+      },
+      tier_distribution: tierDistribution,
+      top_performers: topPerformers,
+      recent_commissions: recentCommissions,
+      monthly_stats: monthlyStats
+    });
+  } catch (error) {
+    console.error('Admin analytics error:', error);
+    res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
+});
+
+// GET /api/admin/referrals/payouts - List all payout requests (Admin/Manager only)
+app.get('/api/admin/referrals/payouts', authenticate, authorize(['admin', 'manager']), (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    let whereClause = '';
+    let params = [];
+
+    if (status && ['pending', 'approved', 'paid', 'cancelled'].includes(status)) {
+      whereClause = 'WHERE rp.status = ?';
+      params.push(status);
+    }
+
+    const payouts = db.prepare(`
+      SELECT
+        rp.id,
+        rp.amount,
+        rp.payout_type,
+        rp.status,
+        rp.notes,
+        rp.created_at,
+        rp.approved_at,
+        rp.paid_at,
+        u.id as user_id,
+        u.first_name || ' ' || u.last_name as user_name,
+        u.email,
+        COALESCE(u.available_balance, 0) as current_balance,
+        approver.first_name || ' ' || approver.last_name as approved_by_name
+      FROM referral_payouts rp
+      JOIN users u ON rp.user_id = u.id
+      LEFT JOIN users approver ON rp.approved_by = approver.id
+      ${whereClause}
+      ORDER BY
+        CASE rp.status
+          WHEN 'pending' THEN 1
+          WHEN 'approved' THEN 2
+          WHEN 'paid' THEN 3
+          ELSE 4
+        END,
+        rp.created_at DESC
+      LIMIT ? OFFSET ?
+    `).all(...params, limit, offset);
+
+    const totalResult = db.prepare(`
+      SELECT COUNT(*) as count FROM referral_payouts rp ${whereClause}
+    `).get(...params);
+
+    res.json({
+      payouts,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: totalResult?.count || 0,
+        pages: Math.ceil((totalResult?.count || 0) / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get payouts error:', error);
+    res.status(500).json({ error: 'Failed to fetch payouts' });
+  }
+});
+
+// PUT /api/admin/referrals/payouts/:id - Update payout status (Admin only)
+app.put('/api/admin/referrals/payouts/:id', authenticate, authorize(['admin']), (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+
+    if (!['approved', 'paid', 'cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const payout = db.prepare('SELECT * FROM referral_payouts WHERE id = ?').get(id);
+    if (!payout) {
+      return res.status(404).json({ error: 'Payout not found' });
+    }
+
+    // Build update query
+    let updateFields = ['status = ?'];
+    let updateValues = [status];
+
+    if (notes) {
+      updateFields.push('notes = ?');
+      updateValues.push(notes);
+    }
+
+    if (status === 'approved') {
+      updateFields.push('approved_by = ?', 'approved_at = datetime("now")');
+      updateValues.push(req.user.id);
+    } else if (status === 'paid') {
+      updateFields.push('paid_at = datetime("now")');
+    }
+
+    updateValues.push(id);
+
+    db.prepare(`
+      UPDATE referral_payouts
+      SET ${updateFields.join(', ')}
+      WHERE id = ?
+    `).run(...updateValues);
+
+    // If cancelled and was pending, refund the amount back to user's balance
+    if (status === 'cancelled' && payout.status === 'pending') {
+      db.prepare(`
+        UPDATE users SET available_balance = available_balance + ? WHERE id = ?
+      `).run(payout.amount, payout.user_id);
+    }
+
+    res.json({ success: true, message: `Payout ${status}` });
+  } catch (error) {
+    console.error('Update payout error:', error);
+    res.status(500).json({ error: 'Failed to update payout' });
+  }
+});
+
+// GET /api/admin/referrals/tiers - Get all tiers with full details (Admin only)
+app.get('/api/admin/referrals/tiers', authenticate, authorize(['admin']), (req, res) => {
+  try {
+    const tiers = db.prepare(`
+      SELECT *
+      FROM ambassador_tiers
+      ORDER BY sort_order ASC
+    `).all();
+
+    res.json({ tiers });
+  } catch (error) {
+    console.error('Get admin tiers error:', error);
+    res.status(500).json({ error: 'Failed to fetch tiers' });
+  }
+});
+
+// PUT /api/admin/referrals/tiers/:id - Update tier configuration (Admin only)
+app.put('/api/admin/referrals/tiers/:id', authenticate, authorize(['admin']), (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tier_name, min_referrals, min_sales, commission_rate, signup_bonus_points, is_active } = req.body;
+
+    const tier = db.prepare('SELECT * FROM ambassador_tiers WHERE id = ?').get(id);
+    if (!tier) {
+      return res.status(404).json({ error: 'Tier not found' });
+    }
+
+    db.prepare(`
+      UPDATE ambassador_tiers SET
+        tier_name = COALESCE(?, tier_name),
+        min_referrals = COALESCE(?, min_referrals),
+        min_sales = COALESCE(?, min_sales),
+        commission_rate = COALESCE(?, commission_rate),
+        signup_bonus_points = COALESCE(?, signup_bonus_points),
+        is_active = COALESCE(?, is_active)
+      WHERE id = ?
+    `).run(tier_name, min_referrals, min_sales, commission_rate, signup_bonus_points, is_active, id);
+
+    res.json({ success: true, message: 'Tier updated' });
+  } catch (error) {
+    console.error('Update tier error:', error);
+    res.status(500).json({ error: 'Failed to update tier' });
   }
 });
 

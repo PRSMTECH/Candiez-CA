@@ -142,6 +142,103 @@ export function initializeDatabase() {
     // Index already exists
   }
 
+  // ========================================
+  // Ambassador Program Tables & Migrations
+  // ========================================
+
+  // Ambassador tiers table (defines commission rates and requirements)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ambassador_tiers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tier_name TEXT NOT NULL UNIQUE,
+      min_referrals INTEGER DEFAULT 0,
+      min_sales REAL DEFAULT 0,
+      commission_rate REAL NOT NULL,
+      signup_bonus_points INTEGER DEFAULT 50,
+      is_active INTEGER DEFAULT 1,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  // Referral payouts table (track redemption requests and payments)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS referral_payouts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      amount REAL NOT NULL,
+      payout_type TEXT DEFAULT 'store_credit' CHECK (payout_type IN ('store_credit', 'cash', 'points')),
+      status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'paid', 'cancelled')),
+      notes TEXT,
+      approved_by INTEGER,
+      approved_at TEXT,
+      paid_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (approved_by) REFERENCES users(id)
+    )
+  `);
+
+  // Migration: Add ambassador program columns to users table
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN ambassador_tier TEXT DEFAULT 'Member'`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN total_referral_earnings REAL DEFAULT 0`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN available_balance REAL DEFAULT 0`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN lifetime_referral_count INTEGER DEFAULT 0`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN lifetime_referral_sales REAL DEFAULT 0`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+
+  // Create indexes for ambassador/referral queries
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_referral_rewards_referrer ON referral_rewards(referrer_id)`);
+  } catch (e) {
+    // Index already exists
+  }
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_referral_payouts_user ON referral_payouts(user_id)`);
+  } catch (e) {
+    // Index already exists
+  }
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_referral_payouts_status ON referral_payouts(status)`);
+  } catch (e) {
+    // Index already exists
+  }
+
+  // Seed default ambassador tiers (if not exist)
+  const tierCount = db.prepare(`SELECT COUNT(*) as count FROM ambassador_tiers`).get();
+  if (tierCount.count === 0) {
+    const insertTier = db.prepare(`
+      INSERT INTO ambassador_tiers (tier_name, min_referrals, min_sales, commission_rate, signup_bonus_points, sort_order)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+
+    insertTier.run('Member', 0, 0, 0.05, 50, 1);        // 5% commission, 50 points/signup
+    insertTier.run('Promoter', 5, 500, 0.075, 75, 2);   // 7.5% commission, 75 points/signup
+    insertTier.run('Ambassador', 15, 2000, 0.10, 100, 3); // 10% commission, 100 points/signup
+    insertTier.run('Elite', 50, 10000, 0.15, 150, 4);   // 15% commission, 150 points/signup
+
+    console.log('Default ambassador tiers seeded');
+  }
+
   // Customers table
   db.exec(`
     CREATE TABLE IF NOT EXISTS customers (
@@ -172,6 +269,18 @@ export function initializeDatabase() {
       FOREIGN KEY (referred_by_customer_id) REFERENCES customers(id)
     )
   `);
+
+  // Migration: Add staff/ambassador referral to customers
+  try {
+    db.exec(`ALTER TABLE customers ADD COLUMN referred_by_user_id INTEGER REFERENCES users(id)`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
+  try {
+    db.exec(`ALTER TABLE customers ADD COLUMN referred_by_code TEXT`);
+  } catch (e) {
+    // Column already exists, ignore error
+  }
 
   // Categories table
   db.exec(`
