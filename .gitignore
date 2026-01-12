@@ -41,6 +41,7 @@ coverage/
 tmp/
 temp/
 *.tmp
+tmpclaude-*
 
 # Nested project directory (if exists)
 Candiez-CA/
