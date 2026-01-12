@@ -1,6 +1,6 @@
 # Active Context
 
-**Last Updated**: 2026-01-12 (Late Night Session)
+**Last Updated**: 2026-01-12 (Ambassador Program Session)
 **Project**: Candiez-CA
 
 ## Current Focus
@@ -14,6 +14,7 @@
 - [x] Resend API configuration (Railway env var + dotenv fix)
 - [x] Password reset flow (forgot-password, reset-password pages)
 - [x] Vitest test framework (client + server)
+- [x] **Ambassador Program** (complete tiered commission system)
 
 ## Active Features
 <!-- Features currently in development -->
@@ -27,6 +28,11 @@
 - Professional email templates - Production Ready
 - Password reset flow - Production Ready
 - Test framework (Vitest) - Configured
+- **Ambassador Program** - Production Ready (deployed 2026-01-12)
+  - User dashboard at `/referrals`
+  - Admin panel at `/admin/referrals`
+  - QR code sharing with Web Share API
+  - 4 tiers: Member (5%), Promoter (7.5%), Ambassador (10%), Elite (15%)
 
 ## Known Blockers
 <!-- Issues preventing progress -->
@@ -38,7 +44,7 @@
 1. Set up CI/CD pipeline (GitHub Actions)
 2. Add monitoring/logging
 3. Customer onboarding and training docs
-4. Expand test coverage
+4. Test Ambassador Program in production with Josh
 
 ## Quick Notes
 <!-- Temporary notes and reminders -->
@@ -56,7 +62,8 @@
   - Secondary: https://hhdmovjjvlfkspqrzsjz.supabase.co/storage/v1/object/public/public-media/candiez/images/logos/Candiez2-logo.png
 - CLIENT_URL defaults to https://candiez.shop (production)
 - Test commands: `npm run test:run` (client or server)
-- Total tests: 27 (16 client + 11 server)
+- Total tests: 43 (referral 32 + auth 11)
+- Latest commit: 5b838b7 (Ambassador Program)
 
 ---
 **Usage**: Update at end of each session with current status

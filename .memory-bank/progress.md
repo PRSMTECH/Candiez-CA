@@ -10,7 +10,10 @@
 - **URL**: https://candiez.shop (production)
 - **Backend**: https://candiez-ca-production.up.railway.app
 - **Branch**: master
+- **Commit**: 5b838b7
+- **Vercel**: https://candiezca-alx8fck4r-prsmtechbuilds.vercel.app
 - **Changes**: Ambassador Program complete implementation
+- **Health Check**: ✅ Frontend 200, Backend 200
 
 ### Completed This Session
 - [x] Phase 1: Database schema updates (ambassador_tiers, referral_payouts, user columns)
