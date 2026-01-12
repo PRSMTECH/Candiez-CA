@@ -53,3 +53,5 @@ features.db
 
 # Playwright MCP cache
 .playwright-mcp/
+.vercel
+.env*.local

@@ -7,7 +7,10 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "db:init": "node src/scripts/init-db.js",
-    "postinstall": "npm rebuild better-sqlite3 bcrypt || true"
+    "postinstall": "npm rebuild better-sqlite3 bcrypt || true",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -22,6 +25,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "vitest": "^1.2.0"
   }
 }

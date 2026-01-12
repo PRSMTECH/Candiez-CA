@@ -28,7 +28,29 @@ npm run db:init      # Initialize database
 
 ## Testing
 
-No test framework is currently configured. The project has no test scripts or test directories.
+Both client and server use **Vitest** for testing.
+
+```bash
+# Client tests (jsdom environment)
+cd client
+npm test              # Watch mode
+npm run test:run      # Single run
+npm run test:coverage # With coverage report
+
+# Server tests (node environment)
+cd server
+npm test              # Watch mode
+npm run test:run      # Single run
+npm run test:coverage # With coverage report
+```
+
+### Test Locations
+- Client: `client/src/**/*.test.js` or `client/src/**/*.spec.js`
+- Server: `server/src/**/*.test.js` or `server/src/**/*.spec.js`
+
+### Example Tests
+- `client/src/utils/formatters.test.js` - Utility function tests (currency, date, phone formatting, loyalty tiers)
+- `server/src/middleware/auth.test.js` - JWT auth middleware tests (token generation, verification, authorization)
 
 ## Architecture
 
@@ -107,15 +129,21 @@ Candiez-CA/
 │   │   ├── contexts/          # React Context providers
 │   │   ├── hooks/             # Custom hooks
 │   │   ├── pages/             # Route pages
+│   │   ├── test/              # Test setup and utilities
+│   │   ├── utils/             # Utility functions
 │   │   └── App.jsx            # Main app with routing
+│   ├── vitest.config.js       # Vitest config (jsdom)
 │   └── package.json
 ├── server/                    # Express backend
 │   ├── src/
 │   │   ├── db/
 │   │   │   └── database.js    # SQLite schema init
+│   │   ├── middleware/
+│   │   │   └── auth.js        # JWT auth middleware
 │   │   ├── scripts/
 │   │   │   └── init-db.js     # DB initialization script
 │   │   └── index.js           # Express server (~1500 lines)
+│   ├── vitest.config.js       # Vitest config (node)
 │   └── package.json
 ├── prompts/
 │   └── app_spec.txt           # Full project specification
