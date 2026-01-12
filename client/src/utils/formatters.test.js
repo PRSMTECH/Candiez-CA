@@ -28,7 +28,8 @@ describe('formatCurrency', () => {
 
 describe('formatDate', () => {
   it('formats Date objects correctly', () => {
-    const date = new Date('2025-01-15')
+    // Use explicit time to avoid timezone issues
+    const date = new Date(2025, 0, 15, 12, 0, 0) // Jan 15, 2025 at noon local time
     const formatted = formatDate(date)
     expect(formatted).toContain('Jan')
     expect(formatted).toContain('15')
@@ -36,7 +37,8 @@ describe('formatDate', () => {
   })
 
   it('formats date strings correctly', () => {
-    const formatted = formatDate('2025-06-20')
+    // Use explicit time to avoid timezone issues
+    const formatted = formatDate('2025-06-20T12:00:00')
     expect(formatted).toContain('Jun')
     expect(formatted).toContain('20')
     expect(formatted).toContain('2025')
